@@ -1,9 +1,15 @@
 # Intellij
 .idea
 *.iml
+
+# Eclipse
+.cproject
+.project
+
 # Object files
 *.o
 bin/*
+
 # Libraries
 *.lib
 

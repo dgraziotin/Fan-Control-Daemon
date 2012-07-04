@@ -1,0 +1,12 @@
+[Unit]
+Description=Start the mbpfan daemon
+After=syslog.target
+After=remote-fs.target
+
+[Service]
+ExecStart=/usr/sbin/mbpfan
+Type=forking
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -3,6 +3,7 @@
  *  Copyright (C) 2010  Allan McRae <allan@archlinux.org>
  *  Modifications by Rafael Vega <rvega@elsoftwarehamuerto.org>
  *  Modifications (2012) by Daniel Graziotin <dgraziotin@task3.cc>
+ *  Modifications (2012) by Ismail Khatib <ikhatib@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +25,8 @@
  *
  *  Tested models:
  *    MacBook Pro 8.1 13"  (Intel i7 - Linux 3.2)
- *    Macbook Pro 6,2 15"  (Intel i7 - Linux 3.2)
+ *    MacBook Pro 6,2 15"  (Intel i7 - Linux 3.2)
+ *    MacBook Pro 2,2 15"  (Intel Core 2 Duo - Linux 3.4.4)
  */
 
 
@@ -36,6 +38,7 @@
 #include <syslog.h>
 #include "mbpfan.h"
 #include "global.h"
+#include "settings.h"
 
 /* lazy min/max... */
 #define min(a,b) a < b ? a : b
@@ -273,6 +276,9 @@ void mbpfan()
   int old_temp, new_temp, fan_speed, steps;
   int temp_change;
   int step_up, step_down;
+  FILE *f = NULL;
+  Settings *settings = NULL;
+  int result = 0;
 
   t_sensors* sensors = retrieve_sensors();
   set_fans_man(sensors);
@@ -280,12 +286,62 @@ void mbpfan()
   fan_speed = 2000;
   set_fan_speed(sensors, fan_speed);
 
+  f = fopen("/etc/mbpfan.conf", "r");
+  if (f == NULL)
+    {
+      /* Could not open configfile */
+      if(verbose)
+        {
+          printf("Couldn't open configfile, using defaults\n");
+          if(daemonize)
+            {
+              syslog(LOG_INFO, "Couldn't open configfile, using defaults");
+            }
+        }
+    }
+  else
+    {
+      settings = settings_open(f);
+      fclose(f);
+      if (settings == NULL)
+        {
+          /* Could not read configfile */
+          if(verbose)
+            {
+              printf("Couldn't read configfile\n");
+              if(daemonize)
+                {
+                  syslog(LOG_INFO, "Couldn't read configfile");
+                }
+            }
+        }
+      else
+        {
+          /* Read configfile values */
+          result = settings_get_int(settings, "general", "min_fan_speed");
+          if (result != 0) min_fan_speed = result;
+          result = settings_get_int(settings, "general", "max_fan_speed");
+          if (result != 0) max_fan_speed = result;
+          result = settings_get_int(settings, "general", "low_temp");
+          if (result != 0) low_temp = result;
+          result = settings_get_int(settings, "general", "high_temp");
+          if (result != 0) high_temp = result;
+          result = settings_get_int(settings, "general", "max_temp");
+          if (result != 0) max_temp = result;
+          result = settings_get_int(settings, "general", "polling_interval");
+          if (result != 0) polling_interval = result;
+
+          /* Destroy the settings object */
+          settings_delete(settings);
+        }
+    }
+
   if(verbose)
     {
       printf("Sleeping for %d seconds\n", polling_interval);
       if(daemonize)
         {
-          syslog(LOG_INFO, "Sleeping for %d seconds\n", polling_interval);
+          syslog(LOG_INFO, "Sleeping for %d seconds", polling_interval);
         }
     }
   sleep(polling_interval);
@@ -330,7 +386,7 @@ void mbpfan()
           printf("Old Temp %d: New Temp: %d, Fan Speed: %d\n", old_temp, new_temp, fan_speed);
           if(daemonize)
             {
-              syslog(LOG_INFO, "Old Temp %d: New Temp: %d, Fan Speed: %d\n", old_temp, new_temp, fan_speed);
+              syslog(LOG_INFO, "Old Temp %d: New Temp: %d, Fan Speed: %d", old_temp, new_temp, fan_speed);
             }
         }
 
@@ -341,7 +397,7 @@ void mbpfan()
           printf("Sleeping for %d seconds\n", polling_interval);
           if(daemonize)
             {
-              syslog(LOG_INFO, "Sleeping for %d seconds\n", polling_interval);
+              syslog(LOG_INFO, "Sleeping for %d seconds", polling_interval);
             }
         }
       sleep(polling_interval);

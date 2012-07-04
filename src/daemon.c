@@ -1,6 +1,7 @@
 /**
  *  Copyright (C) 2012  Peter Lombardo <http://peterlombardo.wikidot.com/linux-daemon-in-c>
  *  Modifications (2012) by Daniel Graziotin <dgraziotin@task3.cc>
+ *  Modifications (2012) by Ismail Khatib <ikhatib@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -162,7 +163,7 @@ void go_daemon(void (*fan_control)())
     {
       if (verbose)
         {
-          printf("Writing a new .pid file with value %d at: %s", current_pid, program_pid);
+          printf("Writing a new .pid file with value %d at: %s\n", current_pid, program_pid);
           syslog(LOG_INFO, "Writing a new .pid file with value %d at: %s", current_pid, program_pid);
         }
       if (write_pid(current_pid) == 0)
@@ -170,7 +171,7 @@ void go_daemon(void (*fan_control)())
           syslog(LOG_ERR, "Can not create a .pid file at: %s. Aborting", program_pid);
           if (verbose)
             {
-              printf("ERROR: Can not create a .pid file at: %s. Aborting", program_pid);
+              printf("ERROR: Can not create a .pid file at: %s. Aborting\n", program_pid);
             }
           exit(EXIT_FAILURE);
         }
@@ -178,7 +179,7 @@ void go_daemon(void (*fan_control)())
         {
           if (verbose)
             {
-              printf("Successfully written a new .pid file with value %d at: %s", current_pid, program_pid);
+              printf("Successfully written a new .pid file with value %d at: %s\n", current_pid, program_pid);
               syslog(LOG_INFO, "Successfully written a new .pid file with value %d at: %s", current_pid, program_pid);
             }
         }
