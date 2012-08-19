@@ -56,11 +56,24 @@ clean:
 install:
 	cp $(EXE) /usr/sbin
 	@echo "-----------------------------------------------------------------------------"
-	@echo "An init file suitable for /lib/lsb/init-functions (Debian & Ubuntu fur sure)"
-	@echo "Is located in the main folder of the source files. It is called mbpfan.init."
+	@echo "An init file suitable for /lib/lsb/init-functions (Debian) is located in"
+	@echo "in the main folder of the source files. It is called mbpfan.init.debian"
 	@echo "Rename it to mbpfan, give it execution permissions (chmod +x mbpfan)"
 	@echo "and move it to /etc/init.d"
 	@echo "Then, add it to the default runlevels with sudo update-rc.d mbpfan defaults"
+	@echo ""
+	@echo "Additionally, an init file suitable for /etc/rc.d/init.d/functions"
+	@echo "(RHEL/CentOS & Fedora) is also located at the same place, this file is called"
+	@echo "mbpfan.init.redhat. Also rename it to mbpfan, give it execution permissions"
+	@echo "and move it to /etc/init.d"
+	@echo "To add the script to the default runlevels, run the following as root:"
+	@echo "chkconfig --level 2345 mbpfan on && chkconfig --level 016 mbpfan off"
+	@echo ""
+	@echo "For upstart based init systems (Ubuntu), an example upstart job has been"
+	@echo "provided for use in place of the LSB-style init script. To use, execute"
+	@echo "as root:"
+	@echo "cp mbpfan.upstart /etc/init/mbpfan.conf"
+	@echo "start mbpfan"
 	@echo "-----------------------------------------------------------------------------"
 
 rebuild: clean all

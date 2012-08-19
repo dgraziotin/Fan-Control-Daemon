@@ -1,0 +1,26 @@
+# mbpfan - A simple daemon to control fan speed on all Macbook/Macbook Pros \
+#   (probably all Apple computers) for Linux 3.x.x
+
+description	"mbpfan"
+
+start on filesystem or runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+respawn limit 10 5
+umask 022
+
+console log
+
+pre-start script
+    test -x /usr/sbin/mbpfan || { stop; exit 0; }
+    # A way to turn pidfile writing off would be nice. That or mbpfan
+    # could check for staleness before refusing to control your fans.
+    rm -f /var/run/mbpfan.pid
+end script
+
+# Starting mbpfan in the foreground without being in an interactive tty currently
+#   seems to segfault, so expect forkage.
+expect fork
+exec /usr/sbin/mbpfan
+
