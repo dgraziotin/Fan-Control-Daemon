@@ -222,6 +222,38 @@ t_sensors *retrieve_sensors()
     return sensors_head;
 }
 
+static inline bool
+read_int_attr(const char *path, int *value)
+{
+    FILE *fp;
+    bool ret;
+
+    fp = fopen(path, "rb");
+    if (fp == NULL)
+        return false;
+
+    ret = fscanf(fp, "%d", value) == 1;
+    fclose(fp);
+
+    return ret;
+}
+
+static bool
+retrieve_fan_attr(const char *path_begin, int num, const char *suffix, int *val)
+{
+    bool ret = false;
+    size_t len = strlen(path_begin) + 2 + strlen(suffix);
+    char *path = (char *) malloc(len);
+
+    if (snprintf(path, len, "%s%d%s", path_begin, num, suffix) >= len)
+        goto out;
+
+    ret = read_int_attr(path, val);
+out:
+    free(path);
+
+    return ret;
+}
 
 t_fans *retrieve_fans()
 {
@@ -235,6 +267,8 @@ t_fans *retrieve_fans()
     const char *path_begin = "/sys/devices/platform/applesmc.768/fan";
     const char *path_output_end = "_output";
     const char *path_man_end = "_manual";
+    const char *path_fan_min_end = "_min";
+    const char *path_fan_max_end = "_max";
 
     int path_min_size = strlen(path_begin) + strlen(path_output_end) + 2;
     int path_man_size = strlen(path_begin) + strlen(path_man_end) + 2;
@@ -260,15 +294,36 @@ t_fans *retrieve_fans()
         strncat( path_manual, number, strlen(number) );
         strncat( path_manual, path_man_end, strlen(path_begin) );
 
-
         FILE *file = fopen(path_output, "r");
 
         if(file != NULL) {
+            bool attr_ok;
+
             fan = (t_fans *) malloc( sizeof( t_fans ) );
             fan->fan_output_path = (char *) malloc(sizeof( char ) * path_min_size);
             fan->fan_manual_path = (char *) malloc(sizeof( char ) * path_man_size);
             strcpy(fan->fan_output_path, path_output);
             strcpy(fan->fan_manual_path, path_manual);
+
+            attr_ok = retrieve_fan_attr(path_begin, counter, path_fan_min_end,
+                                        &fan->fanlimits.min_fan_speed);
+            if (attr_ok) {
+                if (min_fan_speed > fan->fanlimits.min_fan_speed)
+                    fan->fanlimits.min_fan_speed = min_fan_speed;
+            } else {
+                fan->fanlimits.min_fan_speed = min_fan_speed;
+            }
+
+            attr_ok = retrieve_fan_attr(path_begin, counter, path_fan_max_end,
+                                        &fan->fanlimits.max_fan_speed);
+            if (attr_ok) {
+                if (max_fan_speed < fan->fanlimits.max_fan_speed)
+                    fan->fanlimits.max_fan_speed = max_fan_speed;
+            } else {
+                fan->fanlimits.max_fan_speed = max_fan_speed;
+            }
+
+            fan->curr_fan_speed = fan->fanlimits.min_fan_speed;
 
             if (fans_head == NULL) {
                 fans_head = fan;
@@ -365,24 +420,25 @@ t_sensors *refresh_sensors(t_sensors *sensors)
 
 
 /* Controls the speed of the fan */
-void set_fan_speed(t_fans* fans, int speed)
+void control_fan(t_fans *f)
 {
-    t_fans *tmp = fans;
     FILE *file;
 
-    while(tmp != NULL) {
-        file = fopen(tmp->fan_output_path, "rw+");
+    file = fopen(f->fan_output_path, "rw+");
 
-        if(file != NULL) {
-            fprintf(file, "%d", speed);
-            fclose(file);
-        }
-
-        tmp = tmp->next;
+    if (file != NULL) {
+        fprintf(file, "%d", f->curr_fan_speed);
+        fclose(file);
     }
-
 }
 
+static inline void set_speed_for_each_fan(t_fans *head)
+{
+    t_fans *curr;
+
+    for (curr = head; curr; curr = curr->next)
+        control_fan(curr);
+}
 
 unsigned short get_temp(t_sensors* sensors)
 {
@@ -492,12 +548,50 @@ void retrieve_settings(const char* settings_path)
     }
 }
 
+static void calc_steps(t_fans *head)
+{
+    t_fans *t;
+
+    for (t = head; t; t = t->next) {
+        t_fanlimits *lim = &t->fanlimits;
+        t->stepinfo.step_up =
+            (float)( lim->max_fan_speed - lim->min_fan_speed ) /
+            (float)( ( max_temp - high_temp ) * ( max_temp - high_temp + 1 ) / 2 );
+        t->stepinfo.step_down =
+            (float)( lim->max_fan_speed - lim->min_fan_speed ) /
+            (float)( ( max_temp - low_temp ) * ( max_temp - low_temp + 1 ) / 2 );
+    }
+}
+
+static void calc_fan_speed(t_fans *f, int old_temp, int curr_temp)
+{
+    int temp_change, steps;
+
+    if (curr_temp >= max_temp && f->curr_fan_speed != f->fanlimits.max_fan_speed)
+        f->curr_fan_speed = f->fanlimits.max_fan_speed;
+
+    if (curr_temp <= low_temp && f->curr_fan_speed != f->fanlimits.min_fan_speed)
+        f->curr_fan_speed = f->fanlimits.min_fan_speed;
+
+    temp_change = curr_temp - old_temp;
+
+    if (temp_change > 0 && curr_temp > high_temp && curr_temp < max_temp) {
+        steps = ( curr_temp - high_temp ) * ( curr_temp - high_temp + 1 ) / 2;
+        f->curr_fan_speed = max( f->curr_fan_speed,
+                ceil(f->fanlimits.min_fan_speed + steps * f->stepinfo.step_up) );
+    }
+
+    if (temp_change < 0 && curr_temp > low_temp && curr_temp < max_temp) {
+        steps = ( max_temp - curr_temp ) * ( max_temp - curr_temp + 1 ) / 2;
+        f->curr_fan_speed = min( f->curr_fan_speed,
+                floor(f->fanlimits.max_fan_speed - steps * f->stepinfo.step_down) );
+    }
+}
 
 void mbpfan()
 {
-    int old_temp, new_temp, fan_speed, steps;
-    int temp_change;
-    int step_up, step_down;
+    int old_temp, new_temp;
+    t_fans *curr;
 
     retrieve_settings(NULL);
 
@@ -507,8 +601,8 @@ void mbpfan()
 
     new_temp = get_temp(sensors);
 
-    fan_speed = min_fan_speed;
-    set_fan_speed(fans, fan_speed);
+    /* set initial fan speed */
+    set_speed_for_each_fan(fans);
 
     if(verbose) {
         printf("Sleeping for 2 seconds to get first temp delta\n");
@@ -519,45 +613,26 @@ void mbpfan()
     }
     sleep(2);
 
-    step_up = (float)( max_fan_speed - min_fan_speed ) /
-              (float)( ( max_temp - high_temp ) * ( max_temp - high_temp + 1 ) / 2 );
-
-    step_down = (float)( max_fan_speed - min_fan_speed ) /
-                (float)( ( max_temp - low_temp ) * ( max_temp - low_temp + 1 ) / 2 );
+    calc_steps(fans);
 
     while(1) {
         old_temp = new_temp;
         new_temp = get_temp(sensors);
 
-        if(new_temp >= max_temp && fan_speed != max_fan_speed) {
-            fan_speed = max_fan_speed;
-        }
+        for (curr = fans; curr; curr = curr->next) {
+            calc_fan_speed(curr, old_temp, new_temp);
+            control_fan(curr);
 
-        if(new_temp <= low_temp && fan_speed != min_fan_speed) {
-            fan_speed = min_fan_speed;
-        }
+            if (verbose) {
+                printf("Old Temp %d: New Temp: %d, Fan Speed: %d\n",
+                       old_temp, new_temp, curr->curr_fan_speed);
 
-        temp_change = new_temp - old_temp;
-
-        if(temp_change > 0 && new_temp > high_temp && new_temp < max_temp) {
-            steps = ( new_temp - high_temp ) * ( new_temp - high_temp + 1 ) / 2;
-            fan_speed = max( fan_speed, ceil(min_fan_speed + steps * step_up) );
-        }
-
-        if(temp_change < 0 && new_temp > low_temp && new_temp < max_temp) {
-            steps = ( max_temp - new_temp ) * ( max_temp - new_temp + 1 ) / 2;
-            fan_speed = min( fan_speed, floor(max_fan_speed - steps * step_down) );
-        }
-
-        if(verbose) {
-            printf("Old Temp %d: New Temp: %d, Fan Speed: %d\n", old_temp, new_temp, fan_speed);
-
-            if(daemonize) {
-                syslog(LOG_INFO, "Old Temp %d: New Temp: %d, Fan Speed: %d", old_temp, new_temp, fan_speed);
+                if (daemonize) {
+                    syslog(LOG_INFO, "Old Temp %d: New Temp: %d, Fan Speed: %d",
+                           old_temp, new_temp, curr->curr_fan_speed);
+                }
             }
         }
-
-        set_fan_speed(fans, fan_speed);
 
         if(verbose) {
             printf("Sleeping for %d seconds\n", polling_interval);
