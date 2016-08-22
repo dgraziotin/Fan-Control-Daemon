@@ -1,4 +1,6 @@
-COMPILER=G++
+COMPILER=clang++
+CC=clang
+CXX=clang++
 
 # todo: object files into output path, processing c / c++ files in the same time (?), nested directories for source files (?)
 C = c
@@ -7,14 +9,14 @@ SOURCE_PATH = src/
 EXE = bin/mbpfan
 CONF = mbpfan.conf
 
-ifeq ($(COMPILER), G++)
+ifeq ($(COMPILER), clang++)
   ifeq ($(OS),Windows_NT)
     OBJ = obj
   else
     OBJ = o
   endif
-  COPT = 
-  CCMD = g++
+  COPT = -x c++ 
+  CCMD = clang++
   OBJFLAG = -o
   EXEFLAG = -o
 # INCLUDES = -I../.includes
