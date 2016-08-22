@@ -103,6 +103,7 @@ int stress(int n)
         f--;
         n = f;
     }
+return 0;
 }
 
 static const char *test_get_temp()
