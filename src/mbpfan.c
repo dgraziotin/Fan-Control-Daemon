@@ -4,6 +4,7 @@
  *  Modifications by Rafael Vega <rvega@elsoftwarehamuerto.org>
  *  Modifications (2012) by Daniel Graziotin <daniel@ineed.coffee>
  *  Modifications (2012) by Ismail Khatib <ikhatib@gmail.com>
+ *  Modifications (2016) by Robert Musial <rmusial@fastmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -213,7 +214,7 @@ t_sensors *retrieve_sensors()
         }
     }
 
-    if (!sensors_found > 0){
+    if (!(sensors_found > 0)){
         syslog(LOG_CRIT, "mbpfan could not detect any temp sensor. Please contact the developer.\n");
         printf("mbpfan could not detect any temp sensor. Please contact the developer.\n");
         exit(EXIT_FAILURE);
@@ -303,7 +304,7 @@ t_fans *retrieve_fans()
         }
     }
 
-    if (!fans_found > 0){
+    if (!(fans_found > 0)){
         syslog(LOG_CRIT, "mbpfan could not detect any fan. Please contact the developer.\n");
         printf("mbpfan could not detect any fan. Please contact the developer.\n");
         exit(EXIT_FAILURE);
