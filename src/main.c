@@ -1,5 +1,6 @@
 /**
  *  Copyright (C) (2012-present) Daniel Graziotin <daniel@ineed.coffee>
+ *  Modifications (2017-present) by Robert Musial <rmmm@member.fsf.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <errno.h>

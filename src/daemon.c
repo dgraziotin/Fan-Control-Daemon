@@ -2,6 +2,7 @@
  *  Copyright (C) 2012  Peter Lombardo <http://peterlombardo.wikidot.com/linux-daemon-in-c>
  *  Modifications (2012) by Ismail Khatib <ikhatib@gmail.com>
  *  Modifications (2012-present) by Daniel Graziotin <daniel@ineed.coffee>
+ *  Modifications (2017-present) by Robert Musial <rmmm@member.fsf.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <syslog.h>
@@ -77,7 +79,7 @@ static void cleanup_and_exit(int exit_code)
 	delete_pid();
 	set_fans_auto(fans);
 	
-	s_fans *next_fan;
+	struct s_fans *next_fan;
 	while (fans != NULL) {
 		next_fan = fans->next;
 		free(fans->fan_output_path);
@@ -86,7 +88,7 @@ static void cleanup_and_exit(int exit_code)
 		fans = next_fan;
 	}
 
-	s_sensors *next_sensor;
+	struct s_sensors *next_sensor;
 	while (sensors != NULL) {
 		next_sensor = sensors->next;
 		free(sensors->path);

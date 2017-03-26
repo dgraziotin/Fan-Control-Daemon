@@ -4,6 +4,7 @@
 #include <time.h>
 #include <limits.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <sys/utsname.h>
 #include "global.h"
 #include "mbpfan.h"

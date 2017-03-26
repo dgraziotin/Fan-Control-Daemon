@@ -1,60 +1,38 @@
-COMPILER=G++
+COMPILER=cc
 
-# todo: object files into output path, processing c / c++ files in the same time (?), nested directories for source files (?)
 C = c
 OUTPUT_PATH = bin/
 SOURCE_PATH = src/
-EXE = bin/mbpfan
+BIN = bin/mbpfan
 CONF = mbpfan.conf
 DOC = README.md
 MAN = mbpfan.8.gz
 
-ifeq ($(COMPILER), G++)
-  ifeq ($(OS),Windows_NT)
-    OBJ = obj
-  else
-    OBJ = o
-  endif
-  COPT = 
-  CCMD = g++
-  OBJFLAG = -o
-  EXEFLAG = -o
-# INCLUDES = -I../.includes
-  INCLUDES =
-# LIBS = -lgc
-  LIBS = -lm
-# LIBPATH = -L../gc/.libs
-  LIBPATH =
-  CPPFLAGS +=  $(COPT) -g $(INCLUDES) #-Wall
-  LDFLAGS += $(LIBPATH) -g $(LIBS) #-Wall
-  DEP = dep
-else
-  OBJ = obj
-  COPT = /O2
-  CCMD = cl
-  OBJFLAG = /Fo
-  EXEFLAG = /Fe
-# INCLUDES = /I..\\.includes
-  INCLUDES =
-# LIBS = ..\\.libs\\libgc.lib
-  LIBS =
-  CPPFLAGS = $(COPT) /DEBUG $(INCLUDES)
-  LDFLAGS = /DEBUG
-endif
+COPT = 
+CC = cc
+OBJFLAG = -o
+BINFLAG = -o
+INCLUDES =
+LIBS = -lm
+LIBPATH =
+CFLAGS +=  $(COPT) -g $(INCLUDES) #-Wall
+LDFLAGS += $(LIBPATH) -g $(LIBS) #-Wall
+DEP = dep
+
 
 OBJS := $(patsubst %.$(C),%.$(OBJ),$(wildcard $(SOURCE_PATH)*.$(C)))
 
 %.$(OBJ):%.$(C)
 	mkdir -p bin
 	@echo Compiling $(basename $<)...
-	$(CCMD) -c $(CPPFLAGS) $(CXXFLAGS) $< $(OBJFLAG)$@
+	$(CC) -c $(CFLAGS) $< $(OBJFLAG)$@
 
 all: $(OBJS)
 	@echo Linking...
-	$(CCMD) $(LDFLAGS) $^ $(LIBS) $(EXEFLAG) $(EXE)
+	$(CC) $(LDFLAGS) $^ $(LIBS) $(BINFLAG) $(BIN)
 
 clean:
-	rm -rf $(SOURCE_PATH)*.$(OBJ) $(EXE)
+	rm -rf $(SOURCE_PATH)*.$(OBJ) $(BIN)
 
 tests:
 	make install
@@ -73,7 +51,7 @@ install:
 	install -d $(DESTDIR)/etc
 	install -d $(DESTDIR)/lib/systemd/system
 	install -d $(DESTDIR)/usr/share/doc/mbpfan
-	install $(EXE) $(DESTDIR)/usr/sbin
+	install $(BIN) $(DESTDIR)/usr/sbin
 	install -m644 $(CONF) $(DESTDIR)/etc
 	install -m644 $(DOC) $(DESTDIR)/usr/share/doc/mbpfan
 	install -d $(DESTDIR)/usr/share/man/man8
