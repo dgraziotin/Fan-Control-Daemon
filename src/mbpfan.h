@@ -89,7 +89,7 @@ void set_fans_auto(t_fans *fans);
  * Given a list of sensors with associated fans
  * Change their speed
  */
-void set_fan_speed(t_fans* fans, int speed);
+void control_fan(t_fans* fans);
 
 /**
  *  Return average CPU temp in degrees (ceiling)
