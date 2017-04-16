@@ -2,7 +2,7 @@
  *  Copyright (C) 2012  Peter Lombardo <http://peterlombardo.wikidot.com/linux-daemon-in-c>
  *  Modifications (2012) by Ismail Khatib <ikhatib@gmail.com>
  *  Modifications (2012-present) by Daniel Graziotin <daniel@ineed.coffee>
- *  Modifications (2017-present) by Robert Musial <rmusial@fastmail.com>
+ *  Modifications (2017-present) by Robert Musial <rmmm@rmmm.info>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
