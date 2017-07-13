@@ -17,6 +17,7 @@
  */
 
 
+#include <sys/prctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -147,6 +148,11 @@ void go_daemon(void (*fan_control)())
         openlog(PROGRAM_NAME, LOG_CONS, LOG_USER);
     }
 
+    // configure timer slack
+    int err = prctl(PR_SET_TIMERSLACK, 1000 * 1000 * 1000, 0, 0, 0);
+    if (err == -1) {
+        perror("prctl");
+    }
 
     pid_t pid_slave;
     pid_t sid_slave;
