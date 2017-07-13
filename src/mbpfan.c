@@ -99,31 +99,25 @@ bool is_legacy_sensors_path()
         exit(EXIT_FAILURE);
     }
 
-    
-    // thanks http://stackoverflow.com/questions/18192998/plain-c-opening-a-directory-with-fopen
-    fopen("/sys/devices/platform/coretemp.0/hwmon", "wb");
+    const char *path_begin = "/sys/devices/platform/coretemp.0/hwmon/hwmon";
+    int counter;
 
-    if (errno == EISDIR) {
-        return 0;
-    } else {
-        return 1;
+    for (counter = 0; counter < 10; counter++) {
+        char hwmon_path[strlen(path_begin)+2];
+        sprintf(hwmon_path, "%s%d", path_begin, counter);
+
+        FILE *file = fopen(hwmon_path, "rb");
+        int isdir = file == NULL && errno == EISDIR;
+        if (file != NULL) {
+            fclose(file);
+        }
+
+        if (isdir) {
+            return 0;
+        }
     }
 
-    // 
-    // str_kernel_version = strtok(NULL, ".");
-    // int kernel_version = atoi(str_kernel_version);
-
-    // if(verbose) {
-    //     printf("Detected kernel version: %s\n", kernel.release);
-    //     printf("Detected kernel minor revision: %s\n", str_kernel_version);
-
-    //     if(daemonize) {
-    //         syslog(LOG_INFO, "Kernel version: %s", kernel.release);
-    //         syslog(LOG_INFO, "Detected kernel minor revision: %s", str_kernel_version);
-    //     }
-    // }
-
-    // return (atoi(kernel.release) == 3 && kernel_version < 15);
+    return 1;
 }
 
 
@@ -166,10 +160,13 @@ t_sensors *retrieve_sensors()
 
             sprintf(hwmon_path, "%s%d", path_begin, counter);
 
-            // thanks http://stackoverflow.com/questions/18192998/plain-c-opening-a-directory-with-fopen
-            fopen(hwmon_path, "wb");
+            FILE *file = fopen(hwmon_path, "rb");
+            int isdir = file == NULL && errno == EISDIR;
+            if (file != NULL) {
+                fclose(file);
+            }
 
-            if (errno == EISDIR) {
+            if (isdir) {
 
                 path_begin = smprintf("%s/temp", hwmon_path);
 
