@@ -272,6 +272,7 @@ t_fans *retrieve_fans()
             fan = (t_fans *) malloc( sizeof( t_fans ) );
             fan->fan_output_path = strdup(path_output);
             fan->fan_manual_path = strdup(path_manual);
+            fan->old_speed = 0;
 
             if (fans_head == NULL) {
                 fans_head = fan;
@@ -373,13 +374,14 @@ void set_fan_speed(t_fans* fans, int speed)
     t_fans *tmp = fans;
 
     while(tmp != NULL) {
-        if(tmp->file != NULL) {
+        if(tmp->file != NULL && tmp->old_speed != speed) {
             char buf[16];
             int len = snprintf(buf, sizeof(buf), "%d", speed);
             int res = pwrite(fileno(tmp->file), buf, len, /*offset=*/ 0);
             if (res == -1) {
                 perror("Could not set fan speed");
             }
+            tmp->old_speed = speed;
         }
 
         tmp = tmp->next;
