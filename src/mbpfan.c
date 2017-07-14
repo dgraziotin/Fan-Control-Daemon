@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 #include <syslog.h>
 #include <stdbool.h>
@@ -578,6 +579,11 @@ void mbpfan()
             }
         }
 
-        sleep(polling_interval);
+        // call nanosleep instead of sleep to avoid rt_sigprocmask and
+        // rt_sigaction
+        struct timespec ts;
+        ts.tv_sec = polling_interval;
+        ts.tv_nsec = 0;
+        nanosleep(&ts, NULL);
     }
 }
