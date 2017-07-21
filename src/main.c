@@ -98,6 +98,48 @@ void check_requirements()
 }
 
 
+static int read_value(const char *path)
+{
+    int value = -1;
+    FILE *file = fopen(path, "r");
+    if (file != NULL) {
+        fscanf(file, "%d", &value);
+        fclose(file);
+    }
+    return value;
+}
+
+
+static void set_defaults(void)
+{
+    int i;
+    char *path;
+    int value;
+    for (i = 1; i <= 10; ++i) {
+        path = smprintf("%s/fan%d_min", APPLESMC_PATH, i);
+        value = read_value(path);
+        if (value != -1 && (min_fan_speed == -1 || value < min_fan_speed)) {
+            min_fan_speed = value;
+        }
+        free(path);
+
+        path = smprintf("%s/fan%d_max", APPLESMC_PATH, i);
+        value = read_value(path);
+        if (value != -1 && (max_fan_speed == -1 || value > max_fan_speed)) {
+            max_fan_speed = value;
+        }
+        free(path);
+    }
+
+    if (min_fan_speed == -1) {
+        min_fan_speed = 2000;
+    }
+    if (max_fan_speed == -1) {
+        max_fan_speed = 6200;
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
 
@@ -133,6 +175,7 @@ int main(int argc, char *argv[])
 
 
     check_requirements();
+    set_defaults();
 
     // pointer to mbpfan() function in mbpfan.c
     void (*fan_control)() = mbpfan;

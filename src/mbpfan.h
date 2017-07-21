@@ -43,6 +43,8 @@ typedef struct s_sensors t_sensors;
 struct s_fans;
 typedef struct s_fans t_fans;
 
+char *smprintf(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
+
 /**
  * Return true if the kernel is < 3.15.0
  */

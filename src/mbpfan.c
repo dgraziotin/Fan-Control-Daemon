@@ -46,8 +46,9 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-int min_fan_speed = 2000;
-int max_fan_speed = 6200;
+// TODO: per-fan minimum and maximum?
+int min_fan_speed = -1;
+int max_fan_speed = -1;
 
 /* temperature thresholds
  * low_temp - temperature below which fan speed will be at minimum
@@ -63,8 +64,7 @@ t_sensors* sensors = NULL;
 t_fans* fans = NULL;
 
 
-static char *smprintf(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
-static char *smprintf(const char *fmt, ...)
+char *smprintf(const char *fmt, ...)
 {
     char *buf;
     int cnt;
@@ -497,6 +497,17 @@ void mbpfan()
     int step_up, step_down;
 
     retrieve_settings(NULL);
+
+    if (min_fan_speed > max_fan_speed) {
+        syslog(LOG_INFO, "Invalid fan speeds: %d %d", min_fan_speed, max_fan_speed);
+        printf("Invalid fan speeds: %d %d\n", min_fan_speed, max_fan_speed);
+        exit(EXIT_FAILURE);
+    }
+    if (low_temp > high_temp || high_temp > max_temp) {
+        syslog(LOG_INFO, "Invalid temperatures: %d %d %d", low_temp, high_temp, max_temp);
+        printf("Invalid temperatures: %d %d %d\n", low_temp, high_temp, max_temp);
+        exit(EXIT_FAILURE);
+    }
 
     sensors = retrieve_sensors();
     fans = retrieve_fans();
