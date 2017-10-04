@@ -171,6 +171,7 @@ t_sensors *retrieve_sensors()
 
             if (errno == EISDIR) {
 
+                free(path_begin);
                 path_begin = smprintf("%s/temp", hwmon_path);
 
                 if(verbose) {
