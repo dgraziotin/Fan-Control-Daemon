@@ -174,13 +174,7 @@ If installed and using the init file, run with (Ubuntu example)
 
 **Ubuntu**
 
-For systemd based init systems (Ubuntu 16.04+), the file mbpfan.service
-has been provided.
-For using it, execute:
-
-    sudo cp mbpfan.service /etc/systemd/system/
-    sudo systemctl enable mbpfan.service
-
+For systemd based init systems (Ubuntu 16.04+), see the systemd section below.
 
 For upstart based init systems (Ubuntu before 16.04), an example upstart job has been provided.
 For using it, execute:
@@ -221,11 +215,6 @@ execute the following (as root):
     sudo systemctl enable mbpfan.service
     sudo systemctl daemon-reload
     sudo systemctl start mbpfan.service
-
-To start the service automatically at boot, also execute the following:
-
-    sudo systemctl enable mbpfan.service
-
 
 ## Usage
 
