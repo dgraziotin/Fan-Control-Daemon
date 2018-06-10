@@ -4,12 +4,14 @@ C = c
 OBJ = o
 OUTPUT_PATH = bin/
 SOURCE_PATH = src/
+VERSION := 2.0.2
+TMP_DIR := $(shell mktemp -d)
 BIN = bin/mbpfan
 CONF = mbpfan.conf
 DOC = README.md
 MAN = mbpfan.8.gz
 
-COPT = 
+COPT =
 CC = cc
 OBJFLAG = -o
 BINFLAG = -o
@@ -18,6 +20,7 @@ LIBS = -lm
 LIBPATH =
 CFLAGS +=  $(COPT) -g $(INCLUDES) -Wall -Wextra -Wno-unused-function
 LDFLAGS += $(LIBPATH) -g $(LIBS) #-Wall
+FILES   := $(wildcard src/*) $(wildcard mbpfan.*) Makefile
 
 OBJS := $(patsubst %.$(C),%.$(OBJ),$(wildcard $(SOURCE_PATH)*.$(C)))
 
@@ -33,7 +36,7 @@ $(BIN): $(OBJS)
 	$(CC) $(LDFLAGS) $^ $(LIBS) $(BINFLAG) $(BIN)
 
 clean:
-	rm -rf $(SOURCE_PATH)*.$(OBJ) $(BIN)
+	rm -rf $(SOURCE_PATH)*.$(OBJ) $(BIN) mbpfan-$(VERSION).tar.gz
 
 tests:
 	make install
@@ -69,3 +72,26 @@ install: $(BIN)
 	@echo ""
 rebuild: clean all
 #rebuild is not entirely correct
+
+mbpfan-$(VERSION).tar.gz: clean $(FILES)
+	mkdir $(TMP_DIR)/mbpfan-$(VERSION)
+	cp -r * $(TMP_DIR)/mbpfan-$(VERSION)
+	cd $(TMP_DIR) ; \
+	tar cfz $(TMP_DIR)/mbpfan-$(VERSION).tar.gz mbpfan-$(VERSION)
+	mv $(TMP_DIR)/mbpfan-$(VERSION).tar.gz .
+	rm -rf $(TMP_DIR)
+
+rpms: mbpfan-$(VERSION).tar.gz
+	mkdir $(TMP_DIR)
+	mkdir $(TMP_DIR)/BUILD
+	mkdir $(TMP_DIR)/RPMS
+	mkdir $(TMP_DIR)/SOURCES
+	mkdir $(TMP_DIR)/SRPMS
+	cp mbpfan-$(VERSION).tar.gz $(TMP_DIR)/SOURCES
+	cd $(TMP_DIR)/BUILD ; \
+	tar xfz $(TMP_DIR)/SOURCES/mbpfan-$(VERSION).tar.gz \
+		mbpfan-$(VERSION)/mbpfan.spec
+	rpmbuild --define '_topdir $(TMP_DIR)' \
+		 -ba $(TMP_DIR)/BUILD/mbpfan-$(VERSION)/mbpfan.spec
+	mv $(TMP_DIR)/RPMS/x86_64/mbpfan-$(VERSION)-*.x86_64.rpm .
+	rm -rf $(TMP_DIR)
