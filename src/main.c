@@ -29,6 +29,7 @@
 #include "mbpfan.h"
 #include "daemon.h"
 #include "global.h"
+#include "main.h"
 #include "minunit.h"
 
 int daemonize = 1;
