@@ -1,0 +1,68 @@
+Name:           mbpfan
+URL:            https://github.com/dgraziotin/mbpfan
+License:        GPLv3
+Group:          System Environment/Daemons
+Version:        %{SOURCE_VERSION}
+Release:        1
+Summary:        A simple daemon to control fan speed on all MacBook/MacBook Pros (probably all Apple computers) for Linux 3.x.x and 4.x.x
+Source:         v%{version}.tar.gz
+
+%description
+This is an enhanced version of Allan McRae mbpfan
+
+mbpfan is a daemon that uses input from coretemp module and sets the fan speed using the applesmc module. This enhanced version assumes any number of processors and fans (max. 10).
+
+It only uses the temperatures from the processors as input.
+It requires coretemp and applesmc kernel modules to be loaded.
+It requires root use
+It daemonizes or stays in foreground
+Verbose mode for both syslog and stdout
+Users can configure it using the file /etc/mbpfan.conf
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+make
+
+%install
+install -D -m755 bin/mbpfan $RPM_BUILD_ROOT/usr/sbin/mbpfan
+install -D -m644 mbpfan.conf $RPM_BUILD_ROOT/etc/mbpfan.conf
+install -D -m644 mbpfan.service $RPM_BUILD_ROOT/usr/lib/systemd/system/mbpfan.service
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post
+%systemd_post mbpfan.service
+# If it is a first installation then autoconfigure daemon
+if [[ ${1} == 1 ]]; then
+  min_fan_speed="$(cat /sys/devices/platform/applesmc.768/fan*_min| uniq| sort |head -1)"
+  max_fan_speed="$(cat /sys/devices/platform/applesmc.768/fan*_max| uniq| sort |tail -1)"
+  let max_temp=$(cat /sys/devices/platform/coretemp.*/hwmon/hwmon*/temp*_max|uniq |sort |tail -1)/1000
+  sed -i "s/min_fan_speed = [^\t]\+/min_fan_speed = $min_fan_speed/g" /etc/mbpfan.conf
+  sed -i "s/max_fan_speed = [^\t]\+/max_fan_speed = $max_fan_speed/g" /etc/mbpfan.conf
+  sed -i "s/max_temp = [^\t]\+/max_temp = $max_temp/g" /etc/mbpfan.conf
+fi
+echo "Attention: mbpfan preconfigured with sane values, to run it type:"
+echo "systemctl start mbpfan"
+echo "To run also at boot, type:"
+echo "systemctl enable mbpfan"
+
+%preun
+%systemd_preun mbpfan.service
+
+%postun
+%systemd_postun_with_restart mbpfan.service
+
+%files
+%defattr (-,root,root)
+%doc AUTHORS README.md
+/usr/sbin/mbpfan
+%config /etc/mbpfan.conf
+/usr/lib/systemd/system/mbpfan.service
+
+%changelog
+* Sun Aug 19 2018 Michele Codutti <codutti@gmail.com> - 2.0.2-2
+- Autoconfig with suggested procedure.
+- Initial packaging
