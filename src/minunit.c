@@ -9,6 +9,7 @@
 #include "global.h"
 #include "mbpfan.h"
 #include "settings.h"
+#include "main.h"
 #include "minunit.h"
 
 int tests_run = 0;
@@ -193,6 +194,8 @@ static const char *all_tests()
 
 int tests()
 {
+    check_requirements();
+
     printf("Starting the tests..\n");
     printf("It is normal for them to take a bit to finish.\n");
     

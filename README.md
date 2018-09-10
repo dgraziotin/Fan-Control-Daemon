@@ -6,18 +6,18 @@ This is an enhanced version of [Allan McRae mbpfan](http://allanmcrae.com/2010/0
 mbpfan is a daemon that uses input from coretemp module and sets the fan speed using the applesmc module.
 This enhanced version assumes any number of processors and fans (max. 10).
 
-*  It only uses the temperatures from the processors as input.
-*  It requires coretemp and applesmc kernel modules to be loaded.
-*  It requires root use
-*  It daemonizes or stays in foreground
-*  Verbose mode for both syslog and stdout
-*  Users can configure it using the file /etc/mbpfan.conf
+* It only uses the temperatures from the processors as input.
+* It requires coretemp and applesmc kernel modules to be loaded.
+* It requires root use
+* It daemonizes or stays in foreground
+* Verbose mode for both syslog and stdout
+* Users can configure it using the file /etc/mbpfan.conf
 
 **Table Of Contents**
 
 - [Supported GNU/Linux Distributions](#supported-gnulinux-distributions)
-- [Tested Macbook Models](#tested-macbook-models)
-- [Tested iMac/Mac Mini Models](#tested-imacmac-mini-models)
+- [Tested MacBook Models](#tested-macbook-models)
+- [Tested iMac/Mac mini Models](#tested-imacmac-mini-models)
 - [Requirements](#requirements)
 - [Installation](#installation)
 	- [Arch Linux](#arch-linux)
@@ -48,7 +48,7 @@ Supported distributions:
 - Trisquel
 - Solus
 
-## Tested Macbook Models
+## Tested MacBook Models
 
 This section reports those models where mbpfan was tested successfully. It does not necessarily mean that the daemon does not work on non-listed models.
 
@@ -62,21 +62,22 @@ This section reports those models where mbpfan was tested successfully. It does 
 - MacBook Pro 6,2 15"  (Intel i7 - Linux 3.5.0)
 - MacBook Pro 6,2 15"  (Intel i7 - Linux 3.2.0)
 - MacBook Pro 2,2 15"  (Intel Core 2 Duo - Linux 3.4.4)
+- MacBook Air 6,1 13"  (Intel i7 - Linux 3.13)
 - MacBook Air 5,2 13"  (Intel i5 - Linux 3.16)
 - MacBook Air 1,1 13"  (Intel Core Duo - Linux 4.4, Linux 4.8)
 - MacBook Air 7,2 13"  (Intel Core Duo - Linux 4.10)
 - MacBook 1,1 (Intel Core Duo - Linux 3.16)
 
-## Tested iMac/Mac Mini Models
+## Tested iMac/Mac mini Models
 
-This section reports the iMac/Mac-mini models where mbpfan was tested successfully.
+This section reports the iMac/Mac mini models where mbpfan was tested successfully.
 
-- iMac Retina 16.2 21.5" (Intel i5 - Linux 4.4.0 Ubuntu 16.04)  
+- iMac Retina 16.2 21.5" (Intel i5 - Linux 4.4.0 Ubuntu 16.04)
 - iMac 12,1 21.5" (Intel i7 - Linux 4.6.4)
 - iMac 5,1 17" (Intel T7400 (Core 2 Duo) - Linux 14.04 Ubuntu)
-- Mac Mini 2,1 (Core 2 Duo - Linux 4.4.0)
-- Mac Mini 5,3 (Core i7 2.0 - Linux 4.4.0 elementary/Ubuntu)
-- Mac Mini 6,1 (Core i7 2.3 - Linux 4.7.3-4-ck Archlinux)
+- Mac mini 2,1 (Core 2 Duo - Linux 4.4.0)
+- Mac mini 5,3 (Core i7 2.0 - Linux 4.4.0 elementary/Ubuntu)
+- Mac mini 6,1 (Core i7 2.3 - Linux 4.7.3-4-ck Archlinux)
 
 ## Requirements
 
@@ -88,7 +89,9 @@ These modules are often automatically loaded when booting up GNU/Linux on a MacB
 
 In most distributions, you can run the following command:
 
-`lsmod | grep coretemp && lsmod | grep applesmc`
+```bash
+lsmod | grep -e applesmc -e coretemp
+```
 
 If you see `coretemp` and `applesmc` listed, you are all set.
 
@@ -174,13 +177,7 @@ If installed and using the init file, run with (Ubuntu example)
 
 **Ubuntu**
 
-For systemd based init systems (Ubuntu 16.04+), the file mbpfan.service
-has been provided.
-For using it, execute:
-
-    sudo cp mbpfan.service /etc/systemd/system/
-    sudo systemctl enable mbpfan.service
-
+For systemd based init systems (Ubuntu 16.04+), see the systemd section below.
 
 For upstart based init systems (Ubuntu before 16.04), an example upstart job has been provided.
 For using it, execute:
@@ -222,11 +219,6 @@ execute the following (as root):
     sudo systemctl daemon-reload
     sudo systemctl start mbpfan.service
 
-To start the service automatically at boot, also execute the following:
-
-    sudo systemctl enable mbpfan.service
-
-
 ## Usage
 
     Usage: ./mbpfan OPTION(S)
@@ -254,4 +246,4 @@ GNU General Public License version 3
 
 **This Project uses following library:**
 
-* [ANSI C Application Settings Managment](http://pokristensson.com/settings.html) by Per Ola Kristensson.
+* [ANSI C Application Settings Management](http://pokristensson.com/settings.html) by Per Ola Kristensson.

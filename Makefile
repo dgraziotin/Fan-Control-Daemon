@@ -10,7 +10,7 @@ DOC = README.md
 MAN = mbpfan.8.gz
 
 COPT = 
-CC = cc
+CC ?= cc
 OBJFLAG = -o
 BINFLAG = -o
 INCLUDES =

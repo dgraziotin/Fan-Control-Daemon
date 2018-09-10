@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 #include <syslog.h>
 #include <stdbool.h>
@@ -45,8 +46,9 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
-int min_fan_speed = 2000;
-int max_fan_speed = 6200;
+// TODO: per-fan minimum and maximum?
+int min_fan_speed = -1;
+int max_fan_speed = -1;
 
 /* temperature thresholds
  * low_temp - temperature below which fan speed will be at minimum
@@ -62,8 +64,7 @@ t_sensors* sensors = NULL;
 t_fans* fans = NULL;
 
 
-static char *smprintf(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
-static char *smprintf(const char *fmt, ...)
+char *smprintf(const char *fmt, ...)
 {
     char *buf;
     int cnt;
@@ -85,7 +86,7 @@ static char *smprintf(const char *fmt, ...)
     return buf;
 }
 
-bool is_legacy_sensors_path()
+bool is_modern_sensors_path()
 {
     struct utsname kernel;
     uname(&kernel);
@@ -99,31 +100,21 @@ bool is_legacy_sensors_path()
         exit(EXIT_FAILURE);
     }
 
-    
-    // thanks http://stackoverflow.com/questions/18192998/plain-c-opening-a-directory-with-fopen
-    fopen("/sys/devices/platform/coretemp.0/hwmon", "wb");
+    int counter;
 
-    if (errno == EISDIR) {
-        return 0;
-    } else {
-        return 1;
+    for (counter = 0; counter < 10; counter++) {
+        int temp;
+        for (temp = 1; temp < 10; ++temp) {
+            char *path = smprintf("/sys/devices/platform/coretemp.0/hwmon/hwmon%d/temp%d_input", counter, temp);
+            int res = access(path, R_OK);
+            free(path);
+            if (res == 0) {
+                return 1;
+            }
+        }
     }
 
-    // 
-    // str_kernel_version = strtok(NULL, ".");
-    // int kernel_version = atoi(str_kernel_version);
-
-    // if(verbose) {
-    //     printf("Detected kernel version: %s\n", kernel.release);
-    //     printf("Detected kernel minor revision: %s\n", str_kernel_version);
-
-    //     if(daemonize) {
-    //         syslog(LOG_INFO, "Kernel version: %s", kernel.release);
-    //         syslog(LOG_INFO, "Detected kernel minor revision: %s", str_kernel_version);
-    //     }
-    // }
-
-    // return (atoi(kernel.release) == 3 && kernel_version < 15);
+    return 0;
 }
 
 
@@ -136,7 +127,7 @@ t_sensors *retrieve_sensors()
     char *path = NULL;
     char *path_begin = NULL;
 
-    if (is_legacy_sensors_path()) {
+    if (!is_modern_sensors_path()) {
         if(verbose) {
             printf("Using legacy sensor path for kernel < 3.15.0\n");
 
@@ -166,11 +157,10 @@ t_sensors *retrieve_sensors()
 
             sprintf(hwmon_path, "%s%d", path_begin, counter);
 
-            // thanks http://stackoverflow.com/questions/18192998/plain-c-opening-a-directory-with-fopen
-            fopen(hwmon_path, "wb");
+            int res = access(hwmon_path, R_OK);
+            if (res == 0) {
 
-            if (errno == EISDIR) {
-
+                free(path_begin);
                 path_begin = smprintf("%s/temp", hwmon_path);
 
                 if(verbose) {
@@ -273,6 +263,7 @@ t_fans *retrieve_fans()
             fan = (t_fans *) malloc( sizeof( t_fans ) );
             fan->fan_output_path = strdup(path_output);
             fan->fan_manual_path = strdup(path_manual);
+            fan->old_speed = 0;
 
             if (fans_head == NULL) {
                 fans_head = fan;
@@ -307,7 +298,7 @@ t_fans *retrieve_fans()
         }
     }
 
-    if (!fans_found > 0){
+    if (fans_found == 0){
         syslog(LOG_CRIT, "mbpfan could not detect any fan. Please contact the developer.\n");
         printf("mbpfan could not detect any fan. Please contact the developer.\n");
         exit(EXIT_FAILURE);
@@ -374,10 +365,14 @@ void set_fan_speed(t_fans* fans, int speed)
     t_fans *tmp = fans;
 
     while(tmp != NULL) {
-        if(tmp->file != NULL) {
+        if(tmp->file != NULL && tmp->old_speed != speed) {
             char buf[16];
             int len = snprintf(buf, sizeof(buf), "%d", speed);
-            pwrite(fileno(tmp->file), buf, len, /*offset=*/ 0);
+            int res = pwrite(fileno(tmp->file), buf, len, /*offset=*/ 0);
+            if (res == -1) {
+                perror("Could not set fan speed");
+            }
+            tmp->old_speed = speed;
         }
 
         tmp = tmp->next;
@@ -503,6 +498,17 @@ void mbpfan()
 
     retrieve_settings(NULL);
 
+    if (min_fan_speed > max_fan_speed) {
+        syslog(LOG_INFO, "Invalid fan speeds: %d %d", min_fan_speed, max_fan_speed);
+        printf("Invalid fan speeds: %d %d\n", min_fan_speed, max_fan_speed);
+        exit(EXIT_FAILURE);
+    }
+    if (low_temp > high_temp || high_temp > max_temp) {
+        syslog(LOG_INFO, "Invalid temperatures: %d %d %d", low_temp, high_temp, max_temp);
+        printf("Invalid temperatures: %d %d %d\n", low_temp, high_temp, max_temp);
+        exit(EXIT_FAILURE);
+    }
+
     sensors = retrieve_sensors();
     fans = retrieve_fans();
     set_fans_man(fans);
@@ -570,6 +576,11 @@ void mbpfan()
             }
         }
 
-        sleep(polling_interval);
+        // call nanosleep instead of sleep to avoid rt_sigprocmask and
+        // rt_sigaction
+        struct timespec ts;
+        ts.tv_sec = polling_interval;
+        ts.tv_nsec = 0;
+        nanosleep(&ts, NULL);
     }
 }
