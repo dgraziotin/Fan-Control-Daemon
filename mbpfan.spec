@@ -3,7 +3,7 @@ URL:            https://github.com/dgraziotin/mbpfan
 License:        GPLv3
 Group:          System Environment/Daemons
 Version:        %{SOURCE_VERSION}
-Release:        1
+Release:        3
 Summary:        A simple daemon to control fan speed on all MacBook/MacBook Pros (probably all Apple computers) for Linux 3.x.x and 4.x.x
 Source:         v%{version}.tar.gz
 
@@ -35,16 +35,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 %systemd_post mbpfan.service
-# If it is a first installation then autoconfigure daemon
-if [[ ${1} == 1 ]]; then
-  min_fan_speed="$(cat /sys/devices/platform/applesmc.768/fan*_min| uniq| sort |head -1)"
-  max_fan_speed="$(cat /sys/devices/platform/applesmc.768/fan*_max| uniq| sort |tail -1)"
-  let max_temp=$(cat /sys/devices/platform/coretemp.*/hwmon/hwmon*/temp*_max|uniq |sort |tail -1)/1000
-  sed -i "s/min_fan_speed = [^\t]\+/min_fan_speed = $min_fan_speed/g" /etc/mbpfan.conf
-  sed -i "s/max_fan_speed = [^\t]\+/max_fan_speed = $max_fan_speed/g" /etc/mbpfan.conf
-  sed -i "s/max_temp = [^\t]\+/max_temp = $max_temp/g" /etc/mbpfan.conf
-fi
-echo "Attention: mbpfan preconfigured with sane values, to run it type:"
+echo "mbpfan will auto detect sane values for min and max fan speeds."
+echo  "If you want to customize these values please edit:"
+echo "/etc/mbpfan.conf"
+echo "To start the daemon now type:"
 echo "systemctl start mbpfan"
 echo "To run also at boot, type:"
 echo "systemctl enable mbpfan"
@@ -63,6 +57,9 @@ echo "systemctl enable mbpfan"
 /usr/lib/systemd/system/mbpfan.service
 
 %changelog
+* Mon Sep 10 2018 Michele Codutti <codutti@gmail.com> - 2.0.2-3
+- Removed autoconfig with suggested procedure because has been integrated on mbpfan.
+
 * Sun Aug 19 2018 Michele Codutti <codutti@gmail.com> - 2.0.2-2
 - Autoconfig with suggested procedure.
 - Initial packaging
