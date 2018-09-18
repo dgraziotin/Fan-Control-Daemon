@@ -59,6 +59,7 @@ void retrieve_settings(const char* settings_path);
 
 /**
  * Detect the sensors in /sys/devices/platform/coretemp.0/temp
+ * and /sys/devices/platform/coretemp.1/temp etc
  * Return a linked list of t_sensors (first temperature detected)
  */
 t_sensors *retrieve_sensors();

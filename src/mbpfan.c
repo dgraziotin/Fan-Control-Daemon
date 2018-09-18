@@ -5,6 +5,7 @@
  *  Modifications (2012) by Ismail Khatib <ikhatib@gmail.com>
  *  Modifications (2012-present) by Daniel Graziotin <daniel@ineed.coffee> [CURRENT MAINTAINER]
  *  Modifications (2017-present) by Robert Musial <rmusial@fastmail.com>
+ *  Modifications (2018-present) by Ati Sharma <ati.sharma@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +19,7 @@
  *
  *
  *  Notes:
- *    Assumes any number of processors and fans (max. 10)
+ *    Assumes any number of processors, cores and fans (max. 6, 16, 12)
  *    It uses only the temperatures from the processors as input.
  *    Requires coretemp and applesmc kernel modules to be loaded.
  *    Requires root use
@@ -102,9 +103,9 @@ bool is_modern_sensors_path()
 
     int counter;
 
-    for (counter = 0; counter < 10; counter++) {
+    for (counter = 0; counter < 12; counter++) {
         int temp;
-        for (temp = 1; temp < 10; ++temp) {
+        for (temp = 1; temp < 16; ++temp) {
             char *path = smprintf("/sys/devices/platform/coretemp.0/hwmon/hwmon%d/temp%d_input", counter, temp);
             int res = access(path, R_OK);
             free(path);
@@ -127,6 +128,9 @@ t_sensors *retrieve_sensors()
     char *path = NULL;
     char *path_begin = NULL;
 
+    const char *path_end = "_input";
+    int sensors_found = 0;
+
     if (!is_modern_sensors_path()) {
         if(verbose) {
             printf("Using legacy sensor path for kernel < 3.15.0\n");
@@ -148,71 +152,72 @@ t_sensors *retrieve_sensors()
             }
         }
 
-        path_begin = strdup("/sys/devices/platform/coretemp.0/hwmon/hwmon");
+	// loop over up to 6 processors
+	int processor;
+	for (processor = 0; processor < 6; processor++) {
 
-        int counter;
-        for (counter = 0; counter < 10; counter++) {
+	    path_begin = smprintf("/sys/devices/platform/coretemp.%d/hwmon/hwmon", processor);
 
-            char hwmon_path[strlen(path_begin)+2];
+	    int counter;
+	    for (counter = 0; counter < 12; counter++) {
 
-            sprintf(hwmon_path, "%s%d", path_begin, counter);
+		char hwmon_path[strlen(path_begin)+2];
 
-            int res = access(hwmon_path, R_OK);
-            if (res == 0) {
+		sprintf(hwmon_path, "%s%d", path_begin, counter);
 
-                free(path_begin);
-                path_begin = smprintf("%s/temp", hwmon_path);
+		int res = access(hwmon_path, R_OK);
+		if (res == 0) {
 
-                if(verbose) {
-                    printf("Found hwmon path at %s\n", path_begin);
+		    free(path_begin);
+		    path_begin = smprintf("%s/temp", hwmon_path);
 
-                    if(daemonize) {
-                        syslog(LOG_INFO, "Found hwmon path at %s\n", path_begin);
-                    }
+		    if(verbose) {
+			printf("Found hwmon path at %s\n", path_begin);
 
-                }
+			if(daemonize) {
+			    syslog(LOG_INFO, "Found hwmon path at %s\n", path_begin);
+			}
 
-                break;
-            }
-        }
-    }
+		    }
 
-    const char *path_end = "_input";
+		    break;
+		}
+	    }
 
-    int sensors_found = 0;
+	    int core = 0;
+	    for(core = 0; core<16; core++) {
+		path = smprintf("%s%d%s", path_begin, core, path_end);
 
-    int counter = 0;
-    for(counter = 0; counter<10; counter++) {
-        path = smprintf("%s%d%s", path_begin, counter, path_end);
+		FILE *file = fopen(path, "r");
 
-        FILE *file = fopen(path, "r");
+		if(file != NULL) {
+		    s = (t_sensors *) malloc( sizeof( t_sensors ) );
+		    s->path = strdup(path);
+		    fscanf(file, "%d", &s->temperature);
 
-        if(file != NULL) {
-            s = (t_sensors *) malloc( sizeof( t_sensors ) );
-            s->path = strdup(path);
-            fscanf(file, "%d", &s->temperature);
+		    if (sensors_head == NULL) {
+			sensors_head = s;
+			sensors_head->next = NULL;
 
-            if (sensors_head == NULL) {
-                sensors_head = s;
-                sensors_head->next = NULL;
+		    } else {
+			t_sensors *tmp = sensors_head;
 
-            } else {
-                t_sensors *tmp = sensors_head;
+			while (tmp->next != NULL) {
+			    tmp = tmp->next;
+			}
 
-                while (tmp->next != NULL) {
-                    tmp = tmp->next;
-                }
+			tmp->next = s;
+			tmp->next->next = NULL;
+		    }
 
-                tmp->next = s;
-                tmp->next->next = NULL;
-            }
+		    s->file = file;
+		    sensors_found++;
+		}
 
-            s->file = file;
-            sensors_found++;
-        }
-
-        free(path);
-        path = NULL;
+		free(path);
+		path = NULL;
+	    }
+	}
     }
 
     if(verbose) {
@@ -252,7 +257,7 @@ t_fans *retrieve_fans()
     int counter = 0;
     int fans_found = 0;
 
-    for(counter = 0; counter<10; counter++) {
+    for(counter = 0; counter<12; counter++) {
 
         path_output = smprintf("%s%d%s", path_begin, counter, path_output_end);
         path_manual = smprintf("%s%d%s", path_begin, counter, path_man_end);
