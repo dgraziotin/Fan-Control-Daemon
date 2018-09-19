@@ -19,7 +19,8 @@
  *
  *
  *  Notes:
- *    Assumes any number of processors, cores and fans (max. 6, 16, 12)
+ *    Assumes any number of processors, cores and fans (max. 6, 16, 12
+ *    as defined in NUM_PROCESSORS, NUM_HWMONS, NUM_TEMP_INPUTS and NUM_FANS)
  *    It uses only the temperatures from the processors as input.
  *    Requires coretemp and applesmc kernel modules to be loaded.
  *    Requires root use
@@ -58,6 +59,12 @@ int max_fan_speed = -1;
 int low_temp = 63;   // try ranges 55-63
 int high_temp = 66;  // try ranges 58-66
 int max_temp = 86;   // do not set it > 90
+
+// maximum number of processors etc supported
+#define NUM_PROCESSORS 6
+#define NUM_HWMONS 12
+#define NUM_TEMP_INPUTS 16
+#define NUM_FANS 10
 
 int polling_interval = 7;
 
@@ -103,9 +110,9 @@ bool is_modern_sensors_path()
 
     int counter;
 
-    for (counter = 0; counter < 12; counter++) {
+    for (counter = 0; counter < NUM_HWMONS; counter++) {
         int temp;
-        for (temp = 1; temp < 16; ++temp) {
+        for (temp = 1; temp < NUM_TEMP_INPUTS; ++temp) {
             char *path = smprintf("/sys/devices/platform/coretemp.0/hwmon/hwmon%d/temp%d_input", counter, temp);
             int res = access(path, R_OK);
             free(path);
@@ -154,12 +161,12 @@ t_sensors *retrieve_sensors()
 
 	// loop over up to 6 processors
 	int processor;
-	for (processor = 0; processor < 6; processor++) {
+	for (processor = 0; processor < NUM_PROCESSORS; processor++) {
 
 	    path_begin = smprintf("/sys/devices/platform/coretemp.%d/hwmon/hwmon", processor);
 
 	    int counter;
-	    for (counter = 0; counter < 12; counter++) {
+	    for (counter = 0; counter < NUM_HWMONS; counter++) {
 
 		char hwmon_path[strlen(path_begin)+2];
 
@@ -185,7 +192,7 @@ t_sensors *retrieve_sensors()
 	    }
 
 	    int core = 0;
-	    for(core = 0; core<16; core++) {
+	    for(core = 0; core<NUM_TEMP_INPUTS; core++) {
 		path = smprintf("%s%d%s", path_begin, core, path_end);
 
 		FILE *file = fopen(path, "r");
@@ -257,7 +264,7 @@ t_fans *retrieve_fans()
     int counter = 0;
     int fans_found = 0;
 
-    for(counter = 0; counter<12; counter++) {
+    for(counter = 0; counter<NUM_FANS; counter++) {
 
         path_output = smprintf("%s%d%s", path_begin, counter, path_output_end);
         path_manual = smprintf("%s%d%s", path_begin, counter, path_man_end);
