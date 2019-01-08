@@ -129,30 +129,55 @@ static const char *test_config_file()
 
 static const char *test_settings()
 {
-    set_defaults();
-    retrieve_settings("./mbpfan.conf.test1");
-    mu_assert("max_fan_speed value is not 6200", max_fan_speed == 6200);
-    mu_assert("polling_interval is not 1", polling_interval == 1);
-    set_defaults();
-    retrieve_settings("./mbpfan.conf.test0");
-    mu_assert("min_fan_speed value is not 2000", min_fan_speed == 2000);
-    mu_assert("polling_interval is not 7", polling_interval == 7);
-    return 0;
-}
+    t_fans* fan = (t_fans *) malloc( sizeof( t_fans ) );
+    fan->fan_id = 1;
+    fan->fan_max_speed = -1; 
+    fan->next = NULL;
 
+    retrieve_settings("./mbpfan.conf.test1", fan);
+    mu_assert("max_fan_speed value is not 6200", fan->fan_max_speed == 6200);
+    mu_assert("polling_interval is not 1", polling_interval == 1);
+
+    fan->fan_min_speed = -1;
+    retrieve_settings("./mbpfan.conf.test0", fan);
+    mu_assert("min_fan_speed value is not 2000", fan->fan_min_speed == 2000);
+    mu_assert("polling_interval is not 7", polling_interval == 7);
+    
+    t_fans* fan2 = (t_fans *)malloc(sizeof(t_fans));
+    fan2->fan_id = 2;
+    fan2->fan_max_speed = -1;
+    fan->next = fan2;
+
+    retrieve_settings("./mbpfan.conf.test2", fan);
+    mu_assert("min_fan1_speed value is not 2000", fan->fan_min_speed == 2000);
+    mu_assert("min_fan2_speed value is not 2000", fan->next->fan_min_speed == 2000);
+
+    free(fan2);
+    fan->next = NULL;
+    free(fan);
+
+    return 0;
+
+}
 int received = 0;
 
 static void handler(int signal)
 {
+    t_fans* fan = (t_fans *) malloc( sizeof( t_fans ) );
+    fan->fan_id = 1;
+    fan->next = NULL;
+
 
     switch(signal) {
     case SIGHUP:
         received = 1;
-        retrieve_settings("./mbpfan.conf.test1");
+        retrieve_settings("./mbpfan.conf.test1", fan);
+	free(fan);
         break;
 
     default:
         received = 0;
+	free(fan);
         break;
     }
 }
@@ -167,15 +192,20 @@ static const char *test_sighup_receive()
 
 static const char *test_settings_reload()
 {
+    t_fans* fan = (t_fans *) malloc( sizeof( t_fans ) );
+    fan->fan_id = 1;
+    fan->next = NULL;
+
     signal(SIGHUP, handler);
-    retrieve_settings("./mbpfan.conf");
+    retrieve_settings("./mbpfan.conf", fan);
     printf("Testing the _supplied_ mbpfan.conf (not the one you are using)..\n");
     // cannot tests min_fan_speed since it is not set and thus auto-detected
     mu_assert("polling_interval is not 7 before SIGHUP", polling_interval == 7);
     raise(SIGHUP);
-    mu_assert("min_fan_speed value is not 6200 after SIGHUP", min_fan_speed == 6200);
+    mu_assert("min_fan_speed value is not 6200 after SIGHUP", fan->fan_min_speed == 6200);
     mu_assert("polling_interval is not 1 after SIGHUP", polling_interval == 1);
-    retrieve_settings("./mbpfan.conf");
+    retrieve_settings("./mbpfan.conf", fan);
+    free(fan);
     return 0;
 }
 

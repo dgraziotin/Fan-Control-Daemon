@@ -112,7 +112,7 @@ void signal_handler(int signal)
     switch(signal) {
     case SIGHUP:
         syslog(LOG_WARNING, "Received SIGHUP signal.");
-        retrieve_settings(NULL);
+        retrieve_settings(NULL, fans);
         break;
 
     case SIGTERM:

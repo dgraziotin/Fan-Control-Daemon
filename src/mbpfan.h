@@ -17,11 +17,6 @@
 #ifndef _MBPFAN_H_
 #define _MBPFAN_H_
 
-/** Basic fan speed parameters
- */
-extern int min_fan_speed;
-extern int max_fan_speed;
-
 /** Temperature Thresholds
  *  low_temp - temperature below which fan speed will be at minimum
  *  high_temp - fan will increase speed when higher than this temperature
@@ -55,7 +50,7 @@ bool is_legacy_sensors_path();
  * /etc/mbpfan.conf
  * If it fails, the default hardcoded settings are used
  */
-void retrieve_settings(const char* settings_path);
+void retrieve_settings(const char* settings_path, t_fans *fans);
 
 /**
  * Detect the sensors in /sys/devices/platform/coretemp.0/temp
@@ -89,11 +84,15 @@ void set_fans_man(t_fans *fans);
 void set_fans_auto(t_fans *fans);
 
 /**
- * Given a list of sensors with associated fans
+ * Given a sensors with associated fans
  * Change their speed
  */
-void set_fan_speed(t_fans* fans, int speed);
+void set_fan_speed(t_fans* fan, int speed);
 
+/**
+ * Given a list of fans set their minumum fan speed
+ */
+void set_fan_minimum_speed(t_fans* fans);
 /**
  *  Return average CPU temp in degrees (ceiling)
  */

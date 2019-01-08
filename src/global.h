@@ -19,7 +19,12 @@ struct s_fans {
     char* path;  // TODO: unused
     char* fan_output_path;
     char* fan_manual_path;
+    int step_up;
+    int step_down;
+    int fan_id;
     int old_speed;
+    int fan_max_speed;
+    int fan_min_speed;
     struct s_fans *next;
 };
 
