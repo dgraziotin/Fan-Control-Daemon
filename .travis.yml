@@ -1,0 +1,4 @@
+dist: xenial
+language: c
+script:
+ - make
