@@ -319,7 +319,10 @@ t_fans *retrieve_fans()
             fan->file = file;
             fans_found++;
         }
-
+	free(path_fan_min);
+	path_fan_min = NULL;
+	free(path_fan_max);
+	path_fan_max = NULL;
         free(path_output);
         path_output = NULL;
         free(path_manual);
@@ -406,7 +409,6 @@ void set_fan_speed(t_fans* fan, int speed)
 
 void set_fan_minimum_speed(t_fans* fans)
 {
-   printf("set_fan_minimum_speed called\n");
    t_fans *tmp = fans;
 
    while(tmp != NULL) {
