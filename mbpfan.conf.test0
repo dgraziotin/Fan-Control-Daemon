@@ -1,7 +1,7 @@
 [general]
 # see https://ineed.coffee/3838/a-beginners-tutorial-for-mbpfan-under-ubuntu for the values
-min_fan_speed = 2000	# put the *lowest* value of "cat /sys/devices/platform/applesmc.768/fan*_min"
-max_fan_speed = 6200	# put the *highest* value of "cat /sys/devices/platform/applesmc.768/fan*_max"
+min_fan1_speed = 2000	# put the *lowest* value of "cat /sys/devices/platform/applesmc.768/fan*_min"
+max_fan1_speed = 6200	# put the *highest* value of "cat /sys/devices/platform/applesmc.768/fan*_max"
 low_temp = 63			# try ranges 55-63, default is 63
 high_temp = 66			# try ranges 58-66, default is 66
 max_temp = 86			# take highest number returned by "cat /sys/devices/platform/coretemp.*/hwmon/hwmon*/temp*_max", divide by 1000

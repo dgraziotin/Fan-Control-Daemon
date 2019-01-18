@@ -1,6 +1,6 @@
 [general]
-min_fan_speed = 6200	# default is 2000
-max_fan_speed = 6200	# default is 6200
+min_fan1_speed = 6200	# default is 2000
+max_fan1_speed = 6200	# default is 6200
 low_temp = 63			# try ranges 55-63, default is 63
 high_temp = 66			# try ranges 58-66, default is 66
 max_temp = 86			# do not set it > 90, default is 86
