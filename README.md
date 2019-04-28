@@ -23,8 +23,9 @@ This enhanced version assumes any number of processors and fans (max. 10).
 - [Requirements](#requirements)
 - [Installation](#installation)
 	- [Arch Linux](#arch-linux)
-	- [Ubuntu](#ubuntu)
+	- [Debian](#debian)
 	- [Gentoo](#gentoo)
+	- [Ubuntu](#ubuntu)
 	- [Generic Install Instructions (All Other Operating Systems)](#generic-install-instructions-all-other-operating-systems)
 - [Run Instructions](#run-instructions)
 - [Starting at boot](#starting-at-boot)
@@ -122,19 +123,27 @@ Please check the relevant documentation of your GNU/Linux distribution.
 See [mbpfan-git at AUR](https://aur.archlinux.org/packages/mbpfan-git/).
 Otherwise, please refer to the Generic Instructions.
 
+### Debian
 
-### Ubuntu
+On Debian 10 or later install via:
 
-Install the ```build-essential``` package.
-Then, refer to the Generic Install Instructions.
-
-Otherwise, a step-by-step [tutorial for beginners is available on my website](https://ineed.coffee/3838/a-beginners-mbpfan-tutorial-for-ubuntu/).
+```
+sudo apt-get install mbpfan
+```
 
 ### Gentoo
 
 Install the ```mbpfan``` package with:
 
     sudo emerge -av app-laptop/mbpfan
+
+### Ubuntu
+
+On Ubuntu 18.04 or later install via:
+
+```
+sudo apt-get install mbpfan
+```
 
 ### Generic Install Instructions (All Other Operating Systems)
 
