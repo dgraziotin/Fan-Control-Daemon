@@ -23,6 +23,7 @@ This enhanced version assumes any number of processors and fans (max. 10).
 - [Requirements](#requirements)
 - [Installation](#installation)
 	- [Arch Linux](#arch-linux)
+	- [CRUX Linux](#crux-linux)
 	- [Debian](#debian)
 	- [Gentoo](#gentoo)
 	- [Ubuntu](#ubuntu)
@@ -123,6 +124,10 @@ Please check the relevant documentation of your GNU/Linux distribution.
 
 See [mbpfan-git at AUR](https://aur.archlinux.org/packages/mbpfan-git/).
 Otherwise, please refer to the Generic Instructions.
+
+### CRUX Linux
+
+Follow the instructions on [jolupalabs REPO](https://github.com/jolupa/jolupalabs) for installation.
 
 ### Debian
 
