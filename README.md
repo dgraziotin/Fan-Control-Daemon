@@ -61,6 +61,7 @@ This section reports those models where mbpfan was tested successfully. It does 
 - MacBook Pro 11,1 13"  (Intel i5 - Linux 3.14, Linux 3.15)
 - MacBook Pro 9,2 13"  (Intel i5/i7 - Linux 3.10)
 - MacBook Pro 8,2 15"  (Intel i7 - Linux 3.6.2)
+- MacBook Pro 8,1 13"  (Intel i5 - 2435M Linux 5.0.9 Fedora 30)
 - MacBook Pro 8,1 13"  (Intel i7 - Linux 3.2.0)
 - MacBook Pro 7,1 15"  (Intel Core 2 Duo - Linux 3.13)
 - MacBook Pro 6,2 15"  (Intel i7 - Linux 3.5.0)
