@@ -355,7 +355,7 @@ static void set_fans_mode(t_fans *fans, int mode)
     t_fans *tmp = fans;
     FILE *file;
 
-    while(tmp != NULL) {
+    while (tmp != NULL) {
         file = fopen(tmp->fan_manual_path, "rw+");
 
         if (file != NULL) {
@@ -383,7 +383,7 @@ t_sensors *refresh_sensors(t_sensors *sensors)
 {
     t_sensors *tmp = sensors;
 
-    while(tmp != NULL) {
+    while (tmp != NULL) {
         if (tmp->file != NULL) {
             char buf[16];
             int len = pread(fileno(tmp->file), buf, sizeof(buf), /*offset=*/ 0);
@@ -415,7 +415,7 @@ void set_fan_minimum_speed(t_fans* fans)
 {
    t_fans *tmp = fans;
 
-   while(tmp != NULL) {
+   while (tmp != NULL) {
       set_fan_speed(tmp,tmp->fan_min_speed); 
       tmp = tmp->next;
    }
@@ -430,7 +430,7 @@ unsigned short get_temp(t_sensors* sensors)
 
     int number_sensors = 0;
 
-    while(tmp != NULL) {
+    while (tmp != NULL) {
         sum_temp += tmp->temperature;
         tmp = tmp->next;
         number_sensors++;
@@ -487,7 +487,7 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
 	
 	    t_fans *fan = fans;
 
-	    while(fan != NULL) {
+	    while (fan != NULL) {
 
 		char* config_key;
 		config_key = smprintf("min_fan%d_speed", fan->fan_id);
@@ -548,7 +548,7 @@ void mbpfan()
     retrieve_settings(NULL, fans);
     
     t_fans* fan = fans;
-    while(fan != NULL) {
+    while (fan != NULL) {
 	
         if (fan->fan_min_speed > fan->fan_max_speed) {
             syslog(LOG_INFO, "Invalid fan speeds: %d %d", fan->fan_min_speed,  fan->fan_max_speed);
@@ -570,7 +570,7 @@ void mbpfan()
     set_fan_minimum_speed(fans);
 
     fan = fans;
-    while(fan != NULL) {
+    while (fan != NULL) {
 
        fan->step_up = (float)( fan->fan_max_speed - fan->fan_min_speed ) /
                       (float)( ( max_temp - high_temp ) * ( max_temp - high_temp + 1 ) / 2 );
@@ -589,13 +589,13 @@ void mbpfan()
     }
     sleep(2);
 
-    while(1) {
+    while (1) {
         old_temp = new_temp;
         new_temp = get_temp(sensors);
 
         fan = fans;
 
-	while(fan != NULL) {
+	while (fan != NULL) {
 	    fan_speed = fan->old_speed;
 
 	    if (new_temp >= max_temp && fan->old_speed != fan->fan_max_speed) {
