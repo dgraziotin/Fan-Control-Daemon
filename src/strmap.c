@@ -98,7 +98,7 @@ void sm_delete(StrMap *map)
         pair = bucket->pairs;
         j = 0;
 
-        while(j < m) {
+        while (j < m) {
             free(pair->key);
             free(pair->value);
             pair++;
