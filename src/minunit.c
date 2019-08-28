@@ -24,7 +24,7 @@ static const char *test_sensor_paths()
     while(tmp != NULL) {
         mu_assert("Sensor does not have a valid path", tmp->path != NULL);
 
-        if(tmp->path != NULL) {
+        if (tmp->path != NULL) {
             mu_assert("Sensor does not have valid temperature", tmp->temperature > 0);
         }
 
@@ -43,7 +43,7 @@ static const char *test_fan_paths()
     int found_fan_path = 0;
 
     while(tmp != NULL) {
-        if(tmp->fan_output_path != NULL) {
+        if (tmp->fan_output_path != NULL) {
             found_fan_path++;
         }
 
