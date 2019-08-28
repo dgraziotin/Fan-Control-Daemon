@@ -39,7 +39,7 @@ int write_pid(int pid)
     FILE *file = NULL;
     file = fopen(PROGRAM_PID, "w");
 
-    if(file != NULL) {
+    if (file != NULL) {
         fprintf(file, "%d", pid);
         fclose(file);
         return 1;
@@ -55,7 +55,7 @@ int read_pid()
     int pid = -1;
     file = fopen(PROGRAM_PID, "r");
 
-    if(file != NULL) {
+    if (file != NULL) {
         fscanf(file, "%d", &pid);
         fclose(file);
         if (kill(pid, 0) == -1 && errno == ESRCH)
@@ -148,7 +148,7 @@ void go_daemon(void (*fan_control)())
     syslog(LOG_INFO, "%s starting up", PROGRAM_NAME);
 
     // Setup syslog logging - see SETLOGMASK(3)
-    if(verbose) {
+    if (verbose) {
         setlogmask(LOG_UPTO(LOG_DEBUG));
         openlog(PROGRAM_NAME, LOG_CONS | LOG_NDELAY | LOG_PERROR | LOG_PID, LOG_USER);
 
@@ -239,7 +239,7 @@ void go_daemon(void (*fan_control)())
 
     fan_control();
 
-    if(daemonize) {
+    if (daemonize) {
         syslog(LOG_INFO, "%s daemon exiting", PROGRAM_NAME);
     }
 
