@@ -135,10 +135,10 @@ t_sensors *retrieve_sensors()
     int sensors_found = 0;
 
     if (!is_modern_sensors_path()) {
-        if(verbose) {
+        if (verbose) {
             printf("Using legacy sensor path for kernel < 3.15.0\n");
 
-            if(daemonize) {
+            if (daemonize) {
                 syslog(LOG_INFO, "Using legacy path for kernel < 3.15.0");
             }
         }
@@ -147,10 +147,10 @@ t_sensors *retrieve_sensors()
 
     } else {
 
-        if(verbose) {
+        if (verbose) {
             printf("Using new sensor path for kernel >= 3.15.0 or some CentOS versions with kernel 3.10.0\n");
 
-            if(daemonize) {
+            if (daemonize) {
                 syslog(LOG_INFO, "Using new sensor path for kernel >= 3.15.0 or some CentOS versions with kernel 3.10.0 ");
             }
         }
@@ -177,10 +177,10 @@ t_sensors *retrieve_sensors()
 		    free(path_begin);
 		    path_begin = smprintf("%s/temp", hwmon_path);
 
-		    if(verbose) {
+		    if (verbose) {
 			printf("Found hwmon path at %s\n", path_begin);
 
-			if(daemonize) {
+			if (daemonize) {
 			    syslog(LOG_INFO, "Found hwmon path at %s\n", path_begin);
 			}
 
@@ -196,7 +196,7 @@ t_sensors *retrieve_sensors()
 
 		FILE *file = fopen(path, "r");
 
-		if(file != NULL) {
+		if (file != NULL) {
 		    s = (t_sensors *) malloc( sizeof( t_sensors ) );
 		    s->path = strdup(path);
 		    fscanf(file, "%d", &s->temperature);
@@ -226,10 +226,10 @@ t_sensors *retrieve_sensors()
 	}
     }
 
-    if(verbose) {
+    if (verbose) {
         printf("Found %d sensors\n", sensors_found);
 
-        if(daemonize) {
+        if (daemonize) {
             syslog(LOG_INFO, "Found %d sensors", sensors_found);
         }
     }
@@ -285,20 +285,20 @@ t_fans *retrieve_fans()
 
         FILE *file = fopen(path_output, "w");
 
-        if(file != NULL) {
+        if (file != NULL) {
             fan = (t_fans *) malloc( sizeof( t_fans ) );
             fan->fan_output_path = strdup(path_output);
             fan->fan_manual_path = strdup(path_manual);
 	    fan->fan_id = counter;
 
 	    int fan_speed = read_value(path_fan_min);
-	    if(fan_speed == -1 || fan_speed < MIN_FAN_SPEED_DEFAULT)
+	    if (fan_speed == -1 || fan_speed < MIN_FAN_SPEED_DEFAULT)
 		fan->fan_min_speed = MIN_FAN_SPEED_DEFAULT;
 	    else
 		fan->fan_min_speed = fan_speed;
 
 	    fan_speed = read_value(path_fan_max);
-	    if(fan_speed == -1 || fan_speed > MAX_FAN_SPEED_DEFAULT)
+	    if (fan_speed == -1 || fan_speed > MAX_FAN_SPEED_DEFAULT)
 		fan->fan_max_speed = MAX_FAN_SPEED_DEFAULT;
 	    else
 		fan->fan_max_speed = fan_speed;
@@ -333,10 +333,10 @@ t_fans *retrieve_fans()
         path_manual = NULL;
     }
 
-    if(verbose) {
+    if (verbose) {
         printf("Found %d fans\n", fans_found);
 
-        if(daemonize) {
+        if (daemonize) {
             syslog(LOG_INFO, "Found %d fans", fans_found);
         }
     }
@@ -358,7 +358,7 @@ static void set_fans_mode(t_fans *fans, int mode)
     while(tmp != NULL) {
         file = fopen(tmp->fan_manual_path, "rw+");
 
-        if(file != NULL) {
+        if (file != NULL) {
             fprintf(file, "%d", mode);
             fclose(file);
         }
@@ -384,7 +384,7 @@ t_sensors *refresh_sensors(t_sensors *sensors)
     t_sensors *tmp = sensors;
 
     while(tmp != NULL) {
-        if(tmp->file != NULL) {
+        if (tmp->file != NULL) {
             char buf[16];
             int len = pread(fileno(tmp->file), buf, sizeof(buf), /*offset=*/ 0);
             buf[len] = '\0';
@@ -400,7 +400,7 @@ t_sensors *refresh_sensors(t_sensors *sensors)
 /* Controls the speed of a fan */
 void set_fan_speed(t_fans* fan, int speed)
 {
-    if(fan != NULL && fan->file != NULL && fan->old_speed != speed) {
+    if (fan != NULL && fan->file != NULL && fan->old_speed != speed) {
        char buf[16];
        int len = snprintf(buf, sizeof(buf), "%d", speed);
        int res = pwrite(fileno(fan->file), buf, len, /*offset=*/ 0);
@@ -461,10 +461,10 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
 
     if (f == NULL) {
         /* Could not open configfile */
-        if(verbose) {
+        if (verbose) {
             printf("Couldn't open configfile, using defaults\n");
 
-            if(daemonize) {
+            if (daemonize) {
                 syslog(LOG_INFO, "Couldn't open configfile, using defaults");
             }
         }
@@ -475,10 +475,10 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
 
         if (settings == NULL) {
             /* Could not read configfile */
-            if(verbose) {
+            if (verbose) {
                 printf("Couldn't read configfile\n");
 
-                if(daemonize) {
+                if (daemonize) {
                     syslog(LOG_WARNING, "Couldn't read configfile");
                 }
             }
@@ -580,10 +580,10 @@ void mbpfan()
        fan = fan->next;
     }
 
-    if(verbose) {
+    if (verbose) {
         printf("Sleeping for 2 seconds to get first temp delta\n");
 
-        if(daemonize) {
+        if (daemonize) {
             syslog(LOG_INFO, "Sleeping for 2 seconds to get first temp delta");
         }
     }
@@ -598,30 +598,30 @@ void mbpfan()
 	while(fan != NULL) {
 	    fan_speed = fan->old_speed;
 
-	    if(new_temp >= max_temp && fan->old_speed != fan->fan_max_speed) {
+	    if (new_temp >= max_temp && fan->old_speed != fan->fan_max_speed) {
                 fan_speed = fan->fan_max_speed;
             }
 
-            if(new_temp <= low_temp && fan_speed != fan->fan_min_speed) {
+            if (new_temp <= low_temp && fan_speed != fan->fan_min_speed) {
                 fan_speed = fan->fan_min_speed;
             }
 
             temp_change = new_temp - old_temp;
 
-            if(temp_change > 0 && new_temp > high_temp && new_temp < max_temp) {
+            if (temp_change > 0 && new_temp > high_temp && new_temp < max_temp) {
                 steps = ( new_temp - high_temp ) * ( new_temp - high_temp + 1 ) / 2;
                 fan_speed = max( fan_speed, ceil(fan->fan_min_speed + steps * fan->step_up) );
             }
 
-            if(temp_change < 0 && new_temp > low_temp && new_temp < max_temp) {
+            if (temp_change < 0 && new_temp > low_temp && new_temp < max_temp) {
                 steps = ( max_temp - new_temp ) * ( max_temp - new_temp + 1 ) / 2;
                 fan_speed = min( fan_speed, floor(fan->fan_max_speed - steps * fan->step_down) );
             }
 
-            if(verbose) {
+            if (verbose) {
                 printf("Old Temp %d: New Temp: %d, Fan Speed: %d\n", old_temp, new_temp, fan_speed);
 	    
-                if(daemonize) {
+                if (daemonize) {
                    syslog(LOG_INFO, "Old Temp %d: New Temp: %d, Fan Speed: %d", old_temp, new_temp, fan_speed);
                 }
 	    }
@@ -630,11 +630,11 @@ void mbpfan()
        	    fan = fan->next;
 	} 
 
-        if(verbose) {
+        if (verbose) {
             printf("Sleeping for %d seconds\n", polling_interval);
             fflush(stdout);
 
-            if(daemonize) {
+            if (daemonize) {
                 syslog(LOG_INFO, "Sleeping for %d seconds", polling_interval);
             }
         }
