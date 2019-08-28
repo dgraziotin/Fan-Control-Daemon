@@ -191,7 +191,7 @@ t_sensors *retrieve_sensors()
 	    }
 
 	    int core = 0;
-	    for(core = 0; core<NUM_TEMP_INPUTS; core++) {
+	    for (core = 0; core<NUM_TEMP_INPUTS; core++) {
 		path = smprintf("%s%d%s", path_begin, core, path_end);
 
 		FILE *file = fopen(path, "r");
@@ -276,7 +276,7 @@ t_fans *retrieve_fans()
     int counter = 0;
     int fans_found = 0;
 
-    for(counter = 0; counter<NUM_FANS; counter++) {
+    for (counter = 0; counter<NUM_FANS; counter++) {
 
         path_output = smprintf("%s%d%s", path_begin, counter, path_output_end);
         path_manual = smprintf("%s%d%s", path_begin, counter, path_man_end);
