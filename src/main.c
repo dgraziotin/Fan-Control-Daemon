@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 
     int c;
 
-    while( (c = getopt(argc, argv, "hftv|help")) != -1) {
+    while ( (c = getopt(argc, argv, "hftv|help")) != -1) {
         switch(c) {
         case 'h':
             print_usage(argc, argv);
