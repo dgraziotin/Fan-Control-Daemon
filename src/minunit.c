@@ -21,7 +21,7 @@ static const char *test_sensor_paths()
     mu_assert("No sensors found", sensors != NULL);
     t_sensors* tmp = sensors;
 
-    while(tmp != NULL) {
+    while (tmp != NULL) {
         mu_assert("Sensor does not have a valid path", tmp->path != NULL);
 
         if (tmp->path != NULL) {
@@ -42,7 +42,7 @@ static const char *test_fan_paths()
     t_fans* tmp = fans;
     int found_fan_path = 0;
 
-    while(tmp != NULL) {
+    while (tmp != NULL) {
         if (tmp->fan_output_path != NULL) {
             found_fan_path++;
         }
@@ -75,7 +75,7 @@ int stress(int n)
     int f = n;
 
     while (f > 0) {
-        while(n > 0) {
+        while (n > 0) {
             srand ( time_seed() );
             n--;
         }
