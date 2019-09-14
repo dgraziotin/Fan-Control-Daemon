@@ -249,10 +249,18 @@ To automatically run mbpfan at boot, run as root:
 As a special bonus, a service file for systemd is also included. To use it,
 execute the following (as root):
 
-    sudo cp mbpfan.service /etc/systemd/system/
-    sudo systemctl enable mbpfan.service
-    sudo systemctl daemon-reload
-    sudo systemctl start mbpfan.service
+    cp mbpfan.service /etc/systemd/system/
+    systemctl enable mbpfan.service
+    systemctl daemon-reload
+    systemctl start mbpfan.service
+    
+    echo '#!/bin/bash
+
+    if [ "$1" == "post suspend" ] ; then
+    	/bin/systemctl restart mbpfan.service
+    fi
+    ' > /lib/systemd/system-sleep/mbpfan 
+    chmod 0755 /lib/systemd/system-sleep/mbpfan 
 
 ## Usage
 
