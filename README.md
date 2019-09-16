@@ -256,7 +256,7 @@ execute the following (as root):
     
     echo '#!/bin/bash
 
-    if [ "$1" == "post suspend" ] ; then
+    if [ "$2" == "suspend" ] ; then
     	/bin/systemctl restart mbpfan.service
     fi
     ' > /lib/systemd/system-sleep/mbpfan 
