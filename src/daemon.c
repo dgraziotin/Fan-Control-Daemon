@@ -86,6 +86,7 @@ static void cleanup_and_exit(int exit_code)
 		if (fans->file != NULL) {
 			fclose(fans->file);
 		}
+		free(fans->label);
 		free(fans->fan_output_path);
 		free(fans->fan_manual_path);
 		free(fans);

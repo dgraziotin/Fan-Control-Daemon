@@ -258,18 +258,38 @@ static int read_value(const char *path)
     return value;
 }
 
+static void read_value_str(const char *path, char *str, size_t len)
+{
+    FILE *file = fopen(path, "r");
+    if (file != NULL) {
+        fgets(str, len, file);
+        fclose(file);
+    }
+}
+
+static void trim_trailing_whitespace(char *str)
+{
+    for (ssize_t i = strlen(str) - 1; i >= 0; --i) {
+        if (isspace(str[i]) || str[i] == '\n') {
+            str[i] = '\0';
+        }
+    }
+}
+
 t_fans *retrieve_fans()
 {
     t_fans *fans_head = NULL;
     t_fans *fan = NULL;
 
     char *path_output = NULL;
+    char *path_label = NULL;
     char *path_manual = NULL;
     char *path_fan_max = NULL;
     char *path_fan_min = NULL;
 
     const char *path_begin = "/sys/devices/platform/applesmc.768/fan";
     const char *path_output_end = "_output";
+    const char *path_label_end = "_label";
     const char *path_man_end = "_manual";
     const char *path_max_speed = "_max";
     const char *path_min_speed = "_min";
@@ -280,6 +300,7 @@ t_fans *retrieve_fans()
     for(counter = 0; counter<NUM_FANS; counter++) {
 
         path_output = smprintf("%s%d%s", path_begin, counter, path_output_end);
+        path_label = smprintf("%s%d%s", path_begin, counter, path_label_end);
         path_manual = smprintf("%s%d%s", path_begin, counter, path_man_end);
 	path_fan_min = smprintf("%s%d%s",path_begin, counter, path_min_speed);
 	path_fan_max = smprintf("%s%d%s",path_begin, counter, path_max_speed);
@@ -303,7 +324,12 @@ t_fans *retrieve_fans()
 		fan->fan_max_speed = MAX_FAN_SPEED_DEFAULT;
 	    else
 		fan->fan_max_speed = fan_speed;
-	    
+
+            size_t max_label_len = 64;
+            fan->label = malloc(max_label_len);
+            read_value_str(path_label, fan->label, max_label_len);
+            trim_trailing_whitespace(fan->label);
+
             fan->old_speed = 0;
 
             if (fans_head == NULL) {
@@ -326,6 +352,8 @@ t_fans *retrieve_fans()
         }
 	free(path_fan_min);
 	path_fan_min = NULL;
+	free(path_label);
+	path_label = NULL;
 	free(path_fan_max);
 	path_fan_max = NULL;
         free(path_output);
@@ -620,10 +648,10 @@ void mbpfan()
             }
 
             if(verbose) {
-                printf("Old Temp %d: New Temp: %d, Fan Speed: %d\n", old_temp, new_temp, fan_speed);
+                printf("Fan: %s Old Temp %d: New Temp: %d Speed: %d\n", fan->label, old_temp, new_temp, fan_speed);
 	    
                 if(daemonize) {
-                   syslog(LOG_INFO, "Old Temp %d: New Temp: %d, Fan Speed: %d", old_temp, new_temp, fan_speed);
+                   syslog(LOG_INFO, "Fan: %s Old Temp %d: New Temp: %d Speed: %d", fan->label, old_temp, new_temp, fan_speed);
                 }
 	    }
 

@@ -17,6 +17,7 @@ struct s_sensors {
 struct s_fans {
     FILE* file;
     char* path;  // TODO: unused
+    char* label;
     char* fan_output_path;
     char* fan_manual_path;
     int step_up;
