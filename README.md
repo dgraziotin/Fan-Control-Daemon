@@ -105,10 +105,9 @@ sudo apt-get install mbpfan
 
 ### Fedora
 
-There is a [Fedora COPR](https://copr.fedorainfracloud.org/coprs/lyessaadi/mbpfan/) to install mbpfan until the package is submitted upstream.
+On Fedora 30 or later:
 
 ```
-sudo dnf copr enable lyessaadi/mbpfan
 sudo dnf install mbpfan
 ```
 
