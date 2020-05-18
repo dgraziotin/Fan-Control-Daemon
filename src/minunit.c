@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "main.h"
 #include "minunit.h"
+#include "util.h"
 
 int tests_run = 0;
 
@@ -158,13 +159,21 @@ static const char *test_settings()
     fan->fan_max_speed = -1; 
     fan->next = NULL;
 
-    retrieve_settings("./mbpfan.conf.test1", fan);
+    if (is_file_readable("./mbpfan.conf.test1")) {
+        retrieve_settings("./mbpfan.conf.test1", fan);
+    } else {
+        retrieve_settings("/etc/mbpfan.d/mbpfan.conf.test1", fan);
+    }
     // choosing the maximum for iMac mid 2011
     mu_assert("max_fan_speed value is not 2600", fan->fan_max_speed == 2600);
     mu_assert("polling_interval is not 2", polling_interval == 2);
 
     fan->fan_min_speed = -1;
-    retrieve_settings("./mbpfan.conf.test0", fan);
+    if (is_file_readable("./mbpfan.conf.test0")) {
+        retrieve_settings("./mbpfan.conf.test0", fan);
+    } else {
+        retrieve_settings("/etc/mbpfan.d/mbpfan.conf.test0", fan);
+    }
     mu_assert("min_fan_speed value is not 2000", fan->fan_min_speed == 2000);
     mu_assert("polling_interval is not 7", polling_interval == 7);
     
@@ -174,7 +183,11 @@ static const char *test_settings()
     fan2->next = NULL;
     fan->next = fan2;
 
-    retrieve_settings("./mbpfan.conf.test2", fan);
+    if (is_file_readable("./mbpfan.conf.test2")) {
+        retrieve_settings("./mbpfan.conf.test2", fan);
+    } else {
+        retrieve_settings("/etc/mbpfan.d/mbpfan.conf.test2", fan);
+    }
     mu_assert("min_fan1_speed value is not 2000", fan->fan_min_speed == 2000);
     mu_assert("min_fan2_speed value is not 2000", fan->next->fan_min_speed == 2000);
 
@@ -197,7 +210,11 @@ static void handler(int signal)
     switch(signal) {
     case SIGHUP:
         received = 1;
-        retrieve_settings("./mbpfan.conf.test1", fan);
+        if (is_file_readable("./mbpfan.conf.test1")) {
+            retrieve_settings("./mbpfan.conf.test1", fan);
+        } else {
+            retrieve_settings("/etc/mbpfan.d/mbpfan.conf.test1", fan);
+        }
 	free(fan);
         break;
 
@@ -227,14 +244,22 @@ static const char *test_settings_reload()
     fan->next = NULL;
 
     signal(SIGHUP, handler);
-    retrieve_settings("./mbpfan.conf", fan);
+    if (is_file_readable("./mbpfan.conf")) {
+        retrieve_settings("./mbpfan.conf", fan);
+    } else {
+        retrieve_settings("/etc/mbpfan.d/mbpfan.conf.sample", fan);
+    }
     printf("Testing the _supplied_ mbpfan.conf (not the one you are using)..\n");
     // cannot tests min_fan_speed since it is not set and thus auto-detected
     mu_assert("polling_interval is not 1 before SIGHUP", polling_interval == 1);
     raise(SIGHUP);
     // cannot tests min_fan_speed since it is not set and thus auto-detected
     mu_assert("polling_interval is not 2 after SIGHUP", polling_interval == 2);
-    retrieve_settings("./mbpfan.conf", fan);
+    if (is_file_readable("./mbpfan.conf")) {
+        retrieve_settings("./mbpfan.conf", fan);
+    } else {
+        retrieve_settings("/etc/mbpfan.d/mbpfan.conf.sample", fan);
+    }
     free_fans(fan);
     return 0;
 }

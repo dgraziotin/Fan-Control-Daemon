@@ -6,6 +6,9 @@ OUTPUT_PATH = bin/
 SOURCE_PATH = src/
 BIN = bin/mbpfan
 CONF = mbpfan.conf
+CONF_TEST_0 = mbpfan.conf.test0
+CONF_TEST_1 = mbpfan.conf.test1
+CONF_TEST_2 = mbpfan.conf.test2
 DOC = README.md
 MAN = mbpfan.8.gz
 
@@ -42,17 +45,22 @@ tests:
 uninstall:
 	rm /usr/sbin/mbpfan
 	rm /etc/mbpfan.conf
+	rm -rf /etc/mbpfan.d
 	rm /lib/systemd/system/mbpfan.service
 	rm /usr/share/man/man8/mbpfan.8.gz
 	rm -rf /usr/share/doc/mbpfan
 
 install: $(BIN)
 	install -d $(DESTDIR)/usr/sbin
-	install -d $(DESTDIR)/etc
+	install -d $(DESTDIR)/etc/mbpfan.d
 	install -d $(DESTDIR)/lib/systemd/system
 	install -d $(DESTDIR)/usr/share/doc/mbpfan
 	install $(BIN) $(DESTDIR)/usr/sbin
 	install -m644 $(CONF) $(DESTDIR)/etc
+	install -Tm644 $(CONF) $(DESTDIR)/etc/mbpfan.d/$(CONF).sample
+	install -m644 $(CONF_TEST_0) $(DESTDIR)/etc/mbpfan.d
+	install -m644 $(CONF_TEST_1) $(DESTDIR)/etc/mbpfan.d
+	install -m644 $(CONF_TEST_2) $(DESTDIR)/etc/mbpfan.d
 	install -m644 $(DOC) $(DESTDIR)/usr/share/doc/mbpfan
 	install -d $(DESTDIR)/usr/share/man/man8
 	install -m644 $(MAN) $(DESTDIR)/usr/share/man/man8

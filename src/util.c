@@ -4,6 +4,18 @@
 #include <syslog.h>
 
 #include "global.h"
+#include "util.h"
+
+bool is_file_readable(const char *path)
+{
+    FILE *f = fopen(path, "r");
+
+    if (f) {
+        fclose(f);
+    }
+
+    return f != NULL;
+}
 
 void mbp_log(int level, const char *fmt, ...)
 {
