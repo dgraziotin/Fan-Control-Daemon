@@ -155,11 +155,7 @@ default compiler to be Clang. Tested with Clang 3.8 and 3.9. Tested with Clang
 
 Run The Tests (Optional)
 ------------------------
-Users may run the tests after installing the program.  Please run the following command _from within the source directory_.
-
-    sudo ./bin/mbpfan -t
-
-or
+Users may run the tests after building the program.  Please run the following command _from within the source directory_.
 
     sudo make tests
 
@@ -233,7 +229,6 @@ execute the following (as root):
 
     -h Show the help screen
     -f Run in foreground
-    -t Run the tests
     -v Be (a lot) verbose
 
 ## References

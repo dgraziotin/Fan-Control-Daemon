@@ -35,6 +35,9 @@
 #include "daemon.h"
 #include "util.h"
 
+int daemonize = 1;
+int verbose = 0;
+
 int write_pid(int pid)
 {
     FILE *file = NULL;

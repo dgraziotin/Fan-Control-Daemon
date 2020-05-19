@@ -1,12 +1,12 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
+#define PROGRAM_NAME "mbpfan"
+#define PROGRAM_VERSION "2.2.0"
+#define PROGRAM_PID "/var/run/mbpfan.pid"
+
 extern int daemonize;
 extern int verbose;
-
-extern const char* PROGRAM_NAME;
-extern const char* PROGRAM_VERSION;
-extern const char* PROGRAM_PID;
 
 struct s_sensors {
     FILE* file;

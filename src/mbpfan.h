@@ -101,6 +101,12 @@ void set_fan_minimum_speed(t_fans* fans);
 unsigned short get_temp(t_sensors* sensors);
 
 /**
+ * Check if user has proper access and that required
+ * kernel modules are available
+ */
+void check_requirements(const char* program_path);
+
+/**
  * Main Program
  */
 void mbpfan();

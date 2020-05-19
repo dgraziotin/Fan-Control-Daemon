@@ -37,6 +37,8 @@
 #include <math.h>
 #include <syslog.h>
 #include <stdbool.h>
+#include <dirent.h>
+#include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/errno.h>
 #include "mbpfan.h"
@@ -47,6 +49,9 @@
 /* lazy min/max... */
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
+
+#define CORETEMP_PATH "/sys/devices/platform/coretemp.0"
+#define APPLESMC_PATH "/sys/devices/platform/applesmc.768"
 
 /* temperature thresholds
  * low_temp - temperature below which fan speed will be at minimum
@@ -523,6 +528,45 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
             settings_delete(settings);
         }
     }
+}
+
+void check_requirements(const char* program_path)
+{
+
+    /**
+     * Check for root
+     */
+
+    uid_t uid=getuid(), euid=geteuid();
+
+    if (uid != 0 || euid != 0) {
+        mbp_log(LOG_ERR, "%s needs root privileges. Please run %s as root. Exiting.", program_path, program_path);
+        exit(EXIT_FAILURE);
+    }
+
+    /**
+      * Check for coretemp and applesmc modules
+      */
+    DIR* dir = opendir(CORETEMP_PATH);
+
+    if (ENOENT == errno) {
+        mbp_log(LOG_ERR, "%s needs coretemp support. Please either load it or build it into the kernel. Exiting.", program_path);
+        exit(EXIT_FAILURE);
+    }
+
+    closedir(dir);
+
+
+    dir = opendir(APPLESMC_PATH);
+
+    if (ENOENT == errno) {
+        mbp_log(LOG_ERR, "%s needs applesmc support. Please either load it or build it into the kernel. Exiting.", program_path);
+        exit(EXIT_FAILURE);
+    }
+
+    closedir(dir);
+
+
 }
 
 void mbpfan()

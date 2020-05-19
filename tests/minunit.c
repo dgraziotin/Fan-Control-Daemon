@@ -6,10 +6,9 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <sys/utsname.h>
-#include "global.h"
-#include "mbpfan.h"
-#include "settings.h"
-#include "main.h"
+#include "../src/global.h"
+#include "../src/mbpfan.h"
+#include "../src/settings.h"
 #include "minunit.h"
 
 int tests_run = 0;
@@ -252,9 +251,9 @@ static const char *all_tests()
     return 0;
 }
 
-int tests()
+int tests(const char *program_path)
 {
-    check_requirements();
+    check_requirements(program_path);
 
     printf("Starting the tests..\n");
     printf("It is normal for them to take a bit to finish.\n");
