@@ -253,6 +253,8 @@ static const char *all_tests()
 
 int tests(const char *program_path)
 {
+    verbose = 1;
+
     check_requirements(program_path);
 
     printf("Starting the tests..\n");
