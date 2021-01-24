@@ -34,6 +34,7 @@
 #include "global.h"
 #include "daemon.h"
 #include "util.h"
+#include "intel_pstate.h"
 
 int daemonize = 1;
 int verbose = 0;
@@ -107,6 +108,9 @@ static void cleanup_and_exit(int exit_code)
 		free(sensors);
 		sensors = next_sensor;
 	}
+
+	intel_pstate_exit(intel_pstate);
+	free(intel_pstate);
 
 	exit(exit_code);
 }
