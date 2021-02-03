@@ -135,7 +135,7 @@ t_sensors *retrieve_sensors()
 
     char *path = NULL;
     char *path_begin = NULL;
-
+    
     const char *path_end = "_input";
     int sensors_found = 0;
 
@@ -211,12 +211,93 @@ t_sensors *retrieve_sensors()
 
 		    s->file = file;
 		    sensors_found++;
+		    if(verbose) {
+		      mbp_log(LOG_INFO, "Found Sensor at %s", path);
+		    }
+
 		}
 
 		free(path);
 		path = NULL;
 	    }
+
 	}
+
+	    // iMac Sensors
+	    // /sys/devices/platform/applesmc.768/
+	    int sensorNo = 0;
+	    char label[80];
+	    char labelType[80] ="";
+	    char labelType2[80] ="";
+	    for(sensorNo = 0; sensorNo<NUM_TEMP_INPUTS; sensorNo++) {
+	      path = smprintf("%s/temp%d_label", APPLESMC_PATH, sensorNo);
+	      FILE *file = fopen(path, "r");
+	      free(path);
+	      if(NULL == file) {
+		continue;
+	      } else {
+		fscanf(file, "%s", label);
+		fclose(file);
+		if (label[1] != 'G' ){ // GPU Only
+		  //		  continue;
+		}
+
+		strncpy(labelType, "???",80);
+		if (label[1] == 'A' ){ strncpy(labelType, "Ambient", 80); }
+		if (label[1] == 'B' ){ strncpy(labelType, "Battery", 80); }
+		if (label[1] == 'C' ){ strncpy(labelType, "CPU", 80); }
+		if (label[1] == 'G' ){ strncpy(labelType, "GPU", 80); }
+		if (label[1] == 'H' ){ strncpy(labelType, "HDD", 80); }
+		if (label[1] == 'p' ){ strncpy(labelType, "Power Supply", 80); }
+		if (label[1] == 'P' ){ strncpy(labelType, "PCH", 80); }
+		if (label[1] == 'L' ){ strncpy(labelType, "LCD", 80); }
+		if (label[1] == 'M' ){ strncpy(labelType, "Memory", 80); }
+		if (label[1] == 'm' ){ strncpy(labelType, "Misc", 80); }
+		if (label[1] == 'O' ){ strncpy(labelType, "Optical", 80); }
+
+		strncpy(labelType2, "???",80);
+		if (label[3] == 'H' ){ strncpy(labelType2, "heatsink", 80); }
+		if (label[3] == 'D' ){ strncpy(labelType2, "Die", 80); }
+		if (label[3] == 'P' ){ strncpy(labelType2, "Proximity", 80); }
+		if (label[3] == 'C' ){ strncpy(labelType2, "Core", 80); }
+
+	      } 
+	    
+	      path = smprintf("%s/temp%d_input", APPLESMC_PATH, sensorNo);
+	      file = fopen(path, "r");
+	      if(file != NULL) {
+		    s = (t_sensors *) malloc( sizeof( t_sensors ) );
+		    s->path = strdup(path);
+		    fscanf(file, "%d", &s->temperature);
+
+		    if (sensors_head == NULL) {
+			sensors_head = s;
+			sensors_head->next = NULL;
+
+		    } else {
+			t_sensors *tmp = sensors_head;
+
+			while (tmp->next != NULL) {
+			    tmp = tmp->next;
+			}
+
+			tmp->next = s;
+			tmp->next->next = NULL;
+		    }
+
+		    s->file = file;
+		    sensors_found++;
+		    if(verbose) {
+		      mbp_log(LOG_INFO, "Found Sensor %s %s %s\t at %s", label,labelType,labelType2, path);
+		    }
+
+	      } else {
+		mbp_log(LOG_INFO, "No Sensor %s at %s", label, path);
+	      }
+
+		free(path);
+		path = NULL;
+	    }
     }
 
     if(verbose) {
@@ -583,14 +664,14 @@ void mbpfan()
     while(fan != NULL) {
 	
         if (fan->fan_min_speed > fan->fan_max_speed) {
-            mbp_log(LOG_ERR, "Invalid fan speeds: %d %d", fan->fan_min_speed,  fan->fan_max_speed);
+            mbp_log(LOG_ERR, "Invalid fan speeds: min: %d max: %d", fan->fan_min_speed,  fan->fan_max_speed);
             exit(EXIT_FAILURE);
         }
 	fan = fan->next;
     }
 
     if (low_temp > high_temp || high_temp > max_temp) {
-        mbp_log(LOG_ERR, "Invalid temperatures: %d %d %d", low_temp, high_temp, max_temp);
+        mbp_log(LOG_ERR, "Invalid temperatures: Low: %d High: %d Max: %d", low_temp, high_temp, max_temp);
         exit(EXIT_FAILURE);
     }
 
@@ -646,7 +727,7 @@ recalibrate:
             }
 
             if(verbose) {
-                mbp_log(LOG_INFO, "Old Temp: %d New Temp: %d Fan: %s Speed: %d", old_temp, new_temp, fan->label, fan_speed);
+	      mbp_log(LOG_INFO, "Old Temp: %d New Temp: %d Fan: %s Speed: %d", old_temp, new_temp, fan->label, fan_speed);
 	    }
 
 	    set_fan_speed(fan, fan_speed);
