@@ -498,8 +498,9 @@ void set_fan_speed(t_fans* fan, int speed)
        int res = pwrite(fileno(fan->file), buf, len, /*offset=*/ 0);
        if (res == -1) {
           perror("Could not set fan speed");
+       } else {
+    	   fan->old_speed = speed;
        }
-       fan->old_speed = speed;
     }
 }
 
