@@ -130,98 +130,102 @@ bool is_modern_sensors_path()
 
 t_sensors *retrieve_sensors()
 {
-    t_sensors *sensors_head = NULL;
-    t_sensors *s = NULL;
+	t_sensors *sensors_head = NULL;
+	t_sensors *s = NULL;
 
-    char *path = NULL;
-    char *path_begin = NULL;
-    
-    const char *path_end = "_input";
-    int sensors_found = 0;
+	char *path = NULL;
+	char *path_begin = NULL;
 
-    if (!is_modern_sensors_path()) {
-        if(verbose) {
-            mbp_log(LOG_INFO, "Using legacy path for kernel < 3.15.0");
-        }
+	const char *path_end = "_input";
+	int sensors_found = 0;
 
-        path_begin = strdup("/sys/devices/platform/coretemp.0/temp");
-
-    } else {
-
-        if(verbose) {
-            mbp_log(LOG_INFO, "Using new sensor path for kernel >= 3.15.0 or some CentOS versions with kernel 3.10.0 ");
-        }
-
-	// loop over up to 6 processors
-	int processor;
-	for (processor = 0; processor < NUM_PROCESSORS; processor++) {
-
-	    if (path_begin != NULL) {
-	        free(path_begin);
-	    }
-	    path_begin = smprintf("/sys/devices/platform/coretemp.%d/hwmon/hwmon", processor);
-
-	    int counter;
-	    for (counter = 0; counter < NUM_HWMONS; counter++) {
-
-                char *hwmon_path = smprintf("%s%d", path_begin, counter);
-
-		int res = access(hwmon_path, R_OK);
-		if (res == 0) {
-
-		    free(path_begin);
-		    path_begin = smprintf("%s/temp", hwmon_path);
-
-		    if(verbose) {
-                        mbp_log(LOG_INFO, "Found hwmon path at %s", path_begin);
-		    }
-
-                    free(hwmon_path);
-		    break;
+	if (!is_modern_sensors_path()) {
+		if (verbose) {
+			mbp_log(LOG_INFO, "Using legacy path for kernel < 3.15.0");
 		}
 
-                free(hwmon_path);
-	    }
+		path_begin = strdup("/sys/devices/platform/coretemp.0/temp");
 
-	    int core = 0;
-	    for(core = 0; core<NUM_TEMP_INPUTS; core++) {
-		path = smprintf("%s%d%s", path_begin, core, path_end);
+	} else {
 
-		FILE *file = fopen(path, "r");
+		if (verbose) {
+			mbp_log(LOG_INFO,
+					"Using new sensor path for kernel >= 3.15.0 or some CentOS versions with kernel 3.10.0 ");
+		}
 
-		if(file != NULL) {
-		    s = (t_sensors *) malloc( sizeof( t_sensors ) );
-		    s->path = strdup(path);
-		    fscanf(file, "%d", &s->temperature);
+		// loop over up to 6 processors
+		int processor;
+		for (processor = 0; processor < NUM_PROCESSORS; processor++) {
 
-		    if (sensors_head == NULL) {
-			sensors_head = s;
-			sensors_head->next = NULL;
+			if (path_begin != NULL) {
+				free(path_begin);
+			}
+			path_begin = smprintf(
+					"/sys/devices/platform/coretemp.%d/hwmon/hwmon", processor);
 
-		    } else {
-			t_sensors *tmp = sensors_head;
+			int counter;
+			for (counter = 0; counter < NUM_HWMONS; counter++) {
 
-			while (tmp->next != NULL) {
-			    tmp = tmp->next;
+				char *hwmon_path = smprintf("%s%d", path_begin, counter);
+
+				int res = access(hwmon_path, R_OK);
+				if (res == 0) {
+
+					free(path_begin);
+					path_begin = smprintf("%s/temp", hwmon_path);
+
+					if (verbose) {
+						mbp_log(LOG_INFO, "Found hwmon path at %s", path_begin);
+					}
+
+					free(hwmon_path);
+					break;
+				}
+
+				free(hwmon_path);
 			}
 
-			tmp->next = s;
-			tmp->next->next = NULL;
-		    }
+			int core = 0;
+			for (core = 0; core < NUM_TEMP_INPUTS; core++) {
+				path = smprintf("%s%d%s", path_begin, core, path_end);
 
-		    s->file = file;
-		    sensors_found++;
-		    if(verbose) {
-		      mbp_log(LOG_INFO, "Found Sensor at %s", path);
-		    }
+				FILE *file = fopen(path, "r");
+
+				if (file != NULL) {
+					s = (t_sensors*) malloc(sizeof(t_sensors));
+					s->path = strdup(path);
+					fscanf(file, "%d", &s->temperature);
+
+					if (sensors_head == NULL) {
+						sensors_head = s;
+						sensors_head->next = NULL;
+
+					} else {
+						t_sensors *tmp = sensors_head;
+
+						while (tmp->next != NULL) {
+							tmp = tmp->next;
+						}
+
+						tmp->next = s;
+						tmp->next->next = NULL;
+					}
+
+					s->file = file;
+					sensors_found++;
+					if (verbose) {
+						read_sensor(s);
+						mbp_log(LOG_INFO, "Found Sensor at %s, Temperature %.2f °C",
+								path, (s->temperature/1000.0));
+					}
+
+				}
+
+				free(path);
+				path = NULL;
+			}
 
 		}
-
-		free(path);
-		path = NULL;
-	    }
-
-	}
 
 	    // iMac Sensors
 	    // /sys/devices/platform/applesmc.768/
@@ -288,7 +292,8 @@ t_sensors *retrieve_sensors()
 		    s->file = file;
 		    sensors_found++;
 		    if(verbose) {
-		      mbp_log(LOG_INFO, "Found Sensor %s %s %s\t at %s", label,labelType,labelType2, path);
+		      read_sensor(s);
+		      mbp_log(LOG_INFO, "Found Sensor %s %s %s\t at %s, Temperature: %.2f °C", label,labelType,labelType2, path,(s->temperature/1000.0));
 		    }
 
 	      } else {
@@ -471,17 +476,22 @@ void set_fans_auto(t_fans *fans)
     set_fans_mode(fans, 0);
 }
 
+void read_sensor(t_sensors *sensor) {
+	if (sensor->file != NULL) {
+		char buf[16];
+		int len = pread(fileno(sensor->file), buf, sizeof(buf), /*offset=*/
+		0);
+		buf[len] = '\0';
+		sensor->temperature = strtod(buf, NULL);
+	}
+}
+
 t_sensors *refresh_sensors(t_sensors *sensors)
 {
     t_sensors *tmp = sensors;
 
     while(tmp != NULL) {
-        if(tmp->file != NULL) {
-            char buf[16];
-            int len = pread(fileno(tmp->file), buf, sizeof(buf), /*offset=*/ 0);
-            buf[len] = '\0';
-            tmp->temperature = strtod(buf, NULL);
-        }
+		read_sensor(tmp);
 
         tmp = tmp->next;
     }

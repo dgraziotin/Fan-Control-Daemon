@@ -61,6 +61,13 @@ void retrieve_settings(const char* settings_path, t_fans *fans);
  */
 t_sensors *retrieve_sensors();
 
+
+/**
+ * Read a Single Sensor
+ */
+void read_sensor(t_sensors *sensor);
+
+
 /**
  * Given a linked list of t_sensors, refresh their detected
  * temperature
