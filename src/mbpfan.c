@@ -196,6 +196,9 @@ t_sensors *retrieve_sensors()
 					s->path = strdup(path);
 					fscanf(file, "%d", &s->temperature);
 
+					s->label = smprintf( "coretemp-%d-%d", processor,core);
+					s->labelDescription = smprintf( "coretemp Processor %d, Core %d", processor,core);
+
 					if (sensors_head == NULL) {
 						sensors_head = s;
 						sensors_head->next = NULL;
@@ -231,8 +234,8 @@ t_sensors *retrieve_sensors()
 	    // /sys/devices/platform/applesmc.768/
 	    int sensorNo = 0;
 	    char label[80];
-	    char labelType[80] ="";
-	    char labelType2[80] ="";
+	    char labelDescription1[80] ="";
+	    char labelDescription2[80] ="";
 	    for(sensorNo = 0; sensorNo<NUM_TEMP_INPUTS; sensorNo++) {
 	      path = smprintf("%s/temp%d_label", APPLESMC_PATH, sensorNo);
 	      FILE *file = fopen(path, "r");
@@ -246,33 +249,38 @@ t_sensors *retrieve_sensors()
 		  //		  continue;
 		}
 
-		strncpy(labelType, "???",80);
-		if (label[1] == 'A' ){ strncpy(labelType, "Ambient", 80); }
-		if (label[1] == 'B' ){ strncpy(labelType, "Battery", 80); }
-		if (label[1] == 'C' ){ strncpy(labelType, "CPU", 80); }
-		if (label[1] == 'G' ){ strncpy(labelType, "GPU", 80); }
-		if (label[1] == 'H' ){ strncpy(labelType, "HDD", 80); }
-		if (label[1] == 'p' ){ strncpy(labelType, "Power Supply", 80); }
-		if (label[1] == 'P' ){ strncpy(labelType, "PCH", 80); }
-		if (label[1] == 'L' ){ strncpy(labelType, "LCD", 80); }
-		if (label[1] == 'M' ){ strncpy(labelType, "Memory", 80); }
-		if (label[1] == 'm' ){ strncpy(labelType, "Misc", 80); }
-		if (label[1] == 'O' ){ strncpy(labelType, "Optical", 80); }
+		strncpy(labelDescription1, "???",80);
+		if (label[1] == 'A' ){ strncpy(labelDescription1, "Ambient", 80); }
+		if (label[1] == 'B' ){ strncpy(labelDescription1, "Battery", 80); }
+		if (label[1] == 'C' ){ strncpy(labelDescription1, "CPU", 80); }
+		if (label[1] == 'G' ){ strncpy(labelDescription1, "GPU", 80); }
+		if (label[1] == 'H' ){ strncpy(labelDescription1, "HDD", 80); }
+		if (label[1] == 'p' ){ strncpy(labelDescription1, "Power Supply", 80); }
+		if (label[1] == 'P' ){ strncpy(labelDescription1, "PCH", 80); }
+		if (label[1] == 'L' ){ strncpy(labelDescription1, "LCD", 80); }
+		if (label[1] == 'M' ){ strncpy(labelDescription1, "Memory", 80); }
+		if (label[1] == 'm' ){ strncpy(labelDescription1, "Misc", 80); }
+		if (label[1] == 'O' ){ strncpy(labelDescription1, "Optical", 80); }
 
-		strncpy(labelType2, "???",80);
-		if (label[3] == 'H' ){ strncpy(labelType2, "heatsink", 80); }
-		if (label[3] == 'D' ){ strncpy(labelType2, "Die", 80); }
-		if (label[3] == 'P' ){ strncpy(labelType2, "Proximity", 80); }
-		if (label[3] == 'C' ){ strncpy(labelType2, "Core", 80); }
+		strncpy(labelDescription2, "???",80);
+		if (label[3] == 'H' ){ strncpy(labelDescription2, "heatsink", 80); }
+		if (label[3] == 'D' ){ strncpy(labelDescription2, "Die", 80); }
+		if (label[3] == 'P' ){ strncpy(labelDescription2, "Proximity", 80); }
+		if (label[3] == 'C' ){ strncpy(labelDescription2, "Core", 80); }
 
-	      } 
-	    
+
+
+	      }
+
 	      path = smprintf("%s/temp%d_input", APPLESMC_PATH, sensorNo);
 	      file = fopen(path, "r");
 	      if(file != NULL) {
 		    s = (t_sensors *) malloc( sizeof( t_sensors ) );
 		    s->path = strdup(path);
 		    fscanf(file, "%d", &s->temperature);
+
+		    s->label = strdup(label);
+		    s->labelDescription = smprintf("%s %s", labelDescription1,labelDescription2);
 
 		    if (sensors_head == NULL) {
 			sensors_head = s;
@@ -293,7 +301,7 @@ t_sensors *retrieve_sensors()
 		    sensors_found++;
 		    if(verbose) {
 		      read_sensor(s);
-		      mbp_log(LOG_INFO, "Found Sensor %s %s %s\t at %s, Temperature: %.2f °C", label,labelType,labelType2, path,(s->temperature/1000.0));
+		      mbp_log(LOG_INFO, "Found Sensor %s %s %s\t at %s, Temperature: %.2f °C", label,labelDescription1,labelDescription2, path,(s->temperature/1000.0));
 		    }
 
 	      } else {
@@ -366,7 +374,7 @@ t_fans *retrieve_fans()
     const char *path_man_end = "_manual";
     const char *path_max_speed = "_max";
     const char *path_min_speed = "_min";
-    
+
     int counter = 0;
     int fans_found = 0;
 
@@ -519,11 +527,12 @@ void set_fan_minimum_speed(t_fans* fans)
    t_fans *tmp = fans;
 
    while(tmp != NULL) {
-      set_fan_speed(tmp,tmp->fan_min_speed); 
+      set_fan_speed(tmp,tmp->fan_min_speed);
       tmp = tmp->next;
    }
 }
-unsigned short get_temp(t_sensors* sensors)
+
+unsigned short get_temp_max(t_sensors* sensors)
 {
     sensors = refresh_sensors(sensors);
     unsigned int temp = 0;
@@ -531,11 +540,32 @@ unsigned short get_temp(t_sensors* sensors)
     t_sensors* tmp = sensors;
 
     while(tmp != NULL) {
-        temp = max(temp, tmp->temperature);
-        tmp = tmp->next;
+		if ( temp < tmp->temperature){
+			temp = tmp->temperature;
+			temp = tmp->temperature;
+		}
+    	    	tmp = tmp->next;
     }
 
     return temp / 1000;
+}
+
+
+t_sensors* get_max_temp_sensor(t_sensors* sensors)
+{
+    sensors = refresh_sensors(sensors);
+    t_sensors* max_temp_sensor=sensors;
+
+    t_sensors* tmp = sensors;
+
+    while(tmp != NULL) {
+		if ( max_temp_sensor->temperature < tmp->temperature){
+			max_temp_sensor = tmp;
+		}
+		tmp = tmp->next;
+    }
+
+    return max_temp_sensor;
 }
 
 void retrieve_settings(const char* settings_path, t_fans* fans)
@@ -569,7 +599,7 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
             }
 
         } else {
-	
+
 	    t_fans *fan = fans;
 
 	    while(fan != NULL) {
@@ -582,7 +612,7 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
                    fan->fan_min_speed = result;
                 }
 		free(config_key);
-		
+
 		config_key = smprintf("max_fan%d_speed", fan->fan_id);
                 result = settings_get_int(settings, "general", config_key);
 
@@ -665,15 +695,16 @@ void mbpfan()
 {
     int old_temp, new_temp, fan_speed, steps;
     int temp_change;
-    
+	t_sensors *max_sensor;
+
     sensors = retrieve_sensors();
     fans = retrieve_fans();
 
     retrieve_settings(NULL, fans);
-    
+
     t_fans* fan = fans;
     while(fan != NULL) {
-	
+
         if (fan->fan_min_speed > fan->fan_max_speed) {
             mbp_log(LOG_ERR, "Invalid fan speeds: min: %d max: %d", fan->fan_min_speed,  fan->fan_max_speed);
             exit(EXIT_FAILURE);
@@ -688,7 +719,7 @@ void mbpfan()
 
     set_fans_man(fans);
 
-    new_temp = get_temp(sensors);
+    new_temp = get_temp_max(sensors);
     set_fan_minimum_speed(fans);
 
     fan = fans;
@@ -710,8 +741,8 @@ recalibrate:
 
     while(1) {
         old_temp = new_temp;
-        new_temp = get_temp(sensors);
-
+        new_temp = get_temp_max(sensors);
+        max_sensor=get_max_temp_sensor(sensors);
         fan = fans;
 
 	while(fan != NULL) {
@@ -738,17 +769,17 @@ recalibrate:
             }
 
             if(verbose) {
-	      mbp_log(LOG_INFO, "Old Temp: %d New Temp: %d Fan: %s Speed: %d", old_temp, new_temp, fan->label, fan_speed);
+	      mbp_log(LOG_INFO, "Old Temp: %d New Temp: %d (%s) Fan: %s Speed: %d", old_temp, new_temp,max_sensor->label, fan->label, fan_speed );
 	    }
 
 	    set_fan_speed(fan, fan_speed);
        	    fan = fan->next;
-	} 
+	}
 
         if(verbose) {
             mbp_log(LOG_INFO, "Sleeping for %d seconds", polling_interval);
         }
-   
+
         time_t before_sleep = time(NULL);
 
         // call nanosleep instead of sleep to avoid rt_sigprocmask and

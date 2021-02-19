@@ -11,7 +11,9 @@ extern int verbose;
 struct s_sensors {
     FILE* file;
     char* path;
-    unsigned int temperature;
+    char* label;
+    char* labelDescription;
+	unsigned int temperature;
     struct s_sensors *next;
 };
 

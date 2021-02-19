@@ -105,7 +105,13 @@ void set_fan_minimum_speed(t_fans* fans);
 /**
  *  Return maximum CPU temp in degrees
  */
-unsigned short get_temp(t_sensors* sensors);
+unsigned short get_temp_max(t_sensors* sensors);
+
+
+/**
+ * Get the sensor struct with the max temperature
+ */
+t_sensors* get_max_temp_sensor(t_sensors* sensors);
 
 /**
  * Check if user has proper access and that required
