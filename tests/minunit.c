@@ -45,6 +45,7 @@ static const char *test_sensor_paths()
         mu_assert("Sensor does not have a valid path", tmp->path != NULL);
 
         if(tmp->path != NULL) {
+        	// printf("Testing %s %s ==> %d\n",tmp->label,tmp->path,tmp->temperature);
             mu_assert("Sensor does not have valid temperature", tmp->temperature > 0);
         }
 
@@ -112,10 +113,10 @@ static const char *test_get_temp()
 {
     t_sensors* sensors = retrieve_sensors();
     mu_assert("No sensors found", sensors != NULL);
-    unsigned short temp_1 = get_temp(sensors);
+    unsigned short temp_1 = get_temp_max(sensors);
     mu_assert("Invalid Global Temperature Found", temp_1 > 1 && temp_1 < 150);
     stress(2000);
-    unsigned short temp_2 = get_temp(sensors);
+    unsigned short temp_2 = get_temp_max(sensors);
     mu_assert("Invalid Higher temp test (if fan was already spinning high, this is not worrying)", temp_1 < temp_2);
     free_sensors(sensors);
     return 0;
