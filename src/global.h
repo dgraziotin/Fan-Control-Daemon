@@ -15,6 +15,7 @@ struct s_sensors {
     char* labelDescription;
 	unsigned int temperature;
     struct s_sensors *next;
+    bool ignore;
 };
 
 struct s_fans {

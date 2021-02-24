@@ -540,10 +540,14 @@ unsigned short get_temp_max(t_sensors* sensors)
     t_sensors* tmp = sensors;
 
     while(tmp != NULL) {
-		if ( temp < tmp->temperature){
-			temp = tmp->temperature;
-			temp = tmp->temperature;
-		}
+    	if (tmp->temperature>150*1000){
+    	    mbp_log(LOG_ERR, "Ignoring Sensor %s, Temperature %.2d not plausible", tmp->label,tmp->temperature);
+    	} else {
+    		if ( temp < tmp->temperature){
+    			temp = tmp->temperature;
+    			temp = tmp->temperature;
+    		}
+    	}
     	    	tmp = tmp->next;
     }
 
@@ -693,8 +697,9 @@ void check_requirements(const char* program_path)
 
 void mbpfan()
 {
-    int old_temp, new_temp, fan_speed, steps;
-    int temp_change;
+    float old_temp, new_temp;
+    int  fan_speed, steps;
+    float temp_change;
 	t_sensors *max_sensor;
 
     sensors = retrieve_sensors();
@@ -769,7 +774,7 @@ recalibrate:
             }
 
             if(verbose) {
-	      mbp_log(LOG_INFO, "Old Temp: %d New Temp: %d (%s) Fan: %s Speed: %d", old_temp, new_temp,max_sensor->label, fan->label, fan_speed );
+	      mbp_log(LOG_INFO, "Old Temp: %.2f New Temp: %.2f (%s) Fan: %s Speed: %d", old_temp, new_temp,max_sensor->label, fan->label, fan_speed );
 	    }
 
 	    set_fan_speed(fan, fan_speed);
