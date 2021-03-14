@@ -45,6 +45,7 @@
 #include "global.h"
 #include "settings.h"
 #include "util.h"
+#include "intel_pstate.h"
 
 /* lazy min/max... */
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -61,6 +62,9 @@ int low_temp = 63;   // try ranges 55-63
 int high_temp = 66;  // try ranges 58-66
 int max_temp = 86;   // do not set it > 90
 
+/* Whether mbpfan should control the turbo frequency or not */
+int intel_pstate_control = 0;  // disabled by default
+
 // maximum number of processors etc supported
 #define NUM_PROCESSORS 6
 #define NUM_HWMONS 12
@@ -74,6 +78,7 @@ int polling_interval = 1;
 
 t_sensors* sensors = NULL;
 t_fans* fans = NULL;
+t_intel_pstate* intel_pstate = NULL;
 
 char *smprintf(const char *fmt, ...)
 {
@@ -524,6 +529,12 @@ void retrieve_settings(const char* settings_path, t_fans* fans)
                 polling_interval = result;
             }
 
+            result = settings_get_int(settings, "general", "intel_pstate_control");
+
+            if (result != 0) {
+                intel_pstate_control = (result == 0) ? 0 : 1;
+            }
+
             /* Destroy the settings object */
             settings_delete(settings);
         }
@@ -595,12 +606,27 @@ void mbpfan()
 {
     int old_temp, new_temp, fan_speed, steps;
     int temp_change;
+    int err;
     
     sensors = retrieve_sensors();
     fans = retrieve_fans();
 
     retrieve_settings(NULL, fans);
     
+    if (intel_pstate_control) {
+        if (!intel_pstate_is_available()) {
+            mbp_log(LOG_ERR, "Intel pstate control is requested but not available");
+            exit(EXIT_FAILURE);
+        } else {
+            intel_pstate = (t_intel_pstate*)malloc(sizeof(t_intel_pstate));
+            err = intel_pstate_init(intel_pstate);
+            if (err) {
+                mbp_log(LOG_ERR, "Failed to initialize intel_pstate control");
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
     t_fans* fan = fans;
     while(fan != NULL) {
 	
@@ -641,6 +667,13 @@ recalibrate:
     while(1) {
         old_temp = new_temp;
         new_temp = get_temp(sensors);
+
+	if (new_temp <= high_temp) /* maximize turbo below high_temp */
+	    intel_pstate_adjust(intel_pstate, +100);
+	else if (new_temp >= max_temp) /* throttle down to keep the temp in control */
+	    intel_pstate_adjust(intel_pstate, -4);
+	else if ((new_temp - old_temp) <= -3) /* core is cooling down, increase turbo */
+	    intel_pstate_adjust(intel_pstate, +1);
 
         fan = fans;
 
