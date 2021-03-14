@@ -597,10 +597,6 @@ void mbpfan()
             exit(EXIT_FAILURE);
         } else {
             intel_pstate = (t_intel_pstate*)malloc(sizeof(t_intel_pstate));
-            if (!intel_pstate) {
-                mbp_log(LOG_ERR, "Failed to allocate memory for intel_pstate control");
-                exit(EXIT_FAILURE);
-            }
             err = intel_pstate_init(intel_pstate);
             if (err) {
                 mbp_log(LOG_ERR, "Failed to initialize intel_pstate control");
