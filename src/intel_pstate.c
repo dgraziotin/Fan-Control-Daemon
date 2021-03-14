@@ -76,26 +76,29 @@ int intel_pstate_is_available(void)
 
 int intel_pstate_adjust(t_intel_pstate *intel_pstate, int step)
 {
-    int val;
+    int cur_val, new_val;
     int ret;
 
     if (!intel_pstate)
         return 1;
 
     rewind(intel_pstate->f_max_perf_pct);
-    ret = fscanf(intel_pstate->f_max_perf_pct, "%d", &val);
+    ret = fscanf(intel_pstate->f_max_perf_pct, "%d", &cur_val);
     if (ret != 1)
         return -1;
 
-    mbp_log(LOG_INFO, "Adjusting intel_pstate: val: %d, step: %d", val, step);
+    new_val = cur_val + step;
+    if (new_val < 0)
+        new_val = 0;
+    if (new_val > 100)
+        new_val = 100;
 
-    val += step;
-    if (val < 0)
-        val = 0;
-    if (val > 100)
-        val = 100;
+    if (new_val == cur_val)
+	return 0;
 
-    ret = fprintf(intel_pstate->f_max_perf_pct, "%d", val);
+    mbp_log(LOG_INFO, "Adjusting intel_pstate: cur_val: %d, step: %d", cur_val, step);
+
+    ret = fprintf(intel_pstate->f_max_perf_pct, "%d", new_val);
     return (ret > 0) ? 0 : -1;
 }
 
