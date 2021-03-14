@@ -106,7 +106,8 @@ int intel_pstate_is_available(void)
     if ((!dir) && ENOENT == errno)
         return 0;
 
-    closedir(dir);
+    if (dir)
+      closedir(dir);
     return 1;
 }
 
