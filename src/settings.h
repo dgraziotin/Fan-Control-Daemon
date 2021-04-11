@@ -39,8 +39,7 @@
 #include "strmap.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 typedef struct Settings Settings;
@@ -62,7 +61,8 @@ typedef struct Settings Settings;
  *
  * Return value: None.
  */
-typedef void(*settings_section_enum_func)(const char *key, const char *value, const void *obj);
+typedef void (*settings_section_enum_func)(const char *key, const char *value,
+		const void *obj);
 
 /*
  * Creates a settings object.
@@ -70,7 +70,7 @@ typedef void(*settings_section_enum_func)(const char *key, const char *value, co
  * Return value: A pointer to a settings object,
  * or null if a new settings object could not be allocated.
  */
-Settings * settings_new();
+Settings* settings_new();
 
 /*
  * Releases all memory held by a settings object.
@@ -98,7 +98,7 @@ void settings_delete(Settings *settings);
  * Return value: A pointer to a settings object,
  * or null if an error occurred.
  */
-Settings * settings_open(FILE *stream);
+Settings* settings_open(FILE *stream);
 
 /*
  * Saves the current settings object in textual form to the given stream.
@@ -138,7 +138,8 @@ int settings_save(const Settings *settings, FILE *stream);
  * is 1 if an associated value was found and completely copied into the output buffer,
  * 0 otherwise.
  */
-int settings_get(const Settings *settings, const char *section, const char *key, char *out_buf, unsigned int n_out_buf);
+int settings_get(const Settings *settings, const char *section, const char *key,
+		char *out_buf, unsigned int n_out_buf);
 
 /*
  * Returns the integer value associated with the supplied key in the
@@ -157,7 +158,8 @@ int settings_get(const Settings *settings, const char *section, const char *key,
  * Return value: The integer value associated to the provided section and
  * key, or 0 if no such value exists.
  */
-int settings_get_int(const Settings *settings, const char *section, const char *key);
+int settings_get_int(const Settings *settings, const char *section,
+		const char *key);
 
 /*
  * Returns the long integer value associated with the supplied key in the
@@ -176,7 +178,8 @@ int settings_get_int(const Settings *settings, const char *section, const char *
  * Return value: The long integer value associated to the provided section and
  * key, or 0 if no such value exists.
  */
-long settings_get_long(const Settings *settings, const char *section, const char *key);
+long settings_get_long(const Settings *settings, const char *section,
+		const char *key);
 
 /*
  * Returns the double value associated with the supplied key in the
@@ -195,7 +198,8 @@ long settings_get_long(const Settings *settings, const char *section, const char
  * Return value: The double value associated to the provided section and
  * key, or 0 if no such value exists.
  */
-double settings_get_double(const Settings *settings, const char *section, const char *key);
+double settings_get_double(const Settings *settings, const char *section,
+		const char *key);
 
 /*
  * Returns the integer tuple associated with the supplied key in the
@@ -218,7 +222,8 @@ double settings_get_double(const Settings *settings, const char *section, const 
  * Return value: 1 if the entire tuple was copied into the output buffer,
  * 0 otherwise.
  */
-int settings_get_int_tuple(const Settings *settings, const char *section, const char *key, int *out, unsigned int n_out);
+int settings_get_int_tuple(const Settings *settings, const char *section,
+		const char *key, int *out, unsigned int n_out);
 
 /*
  * Returns the long tuple associated with the supplied key in the
@@ -241,7 +246,8 @@ int settings_get_int_tuple(const Settings *settings, const char *section, const 
  * Return value: 1 if the entire tuple was copied into the output buffer,
  * 0 otherwise.
  */
-long settings_get_long_tuple(const Settings *settings, const char *section, const char *key, long *out, unsigned int n_out);
+long settings_get_long_tuple(const Settings *settings, const char *section,
+		const char *key, long *out, unsigned int n_out);
 
 /*
  * Returns the double tuple associated with the supplied key in the
@@ -264,7 +270,8 @@ long settings_get_long_tuple(const Settings *settings, const char *section, cons
  * Return value: 1 if the entire tuple was copied into the output buffer,
  * 0 otherwise.
  */
-double settings_get_double_tuple(const Settings *settings, const char *section, const char *key, double *out, unsigned int n_out);
+double settings_get_double_tuple(const Settings *settings, const char *section,
+		const char *key, double *out, unsigned int n_out);
 
 /*
  * Associates a value with the supplied key in the provided section.
@@ -289,7 +296,8 @@ double settings_get_double_tuple(const Settings *settings, const char *section, 
  *
  * Return value: 1 if the association succeeded, 0 otherwise.
  */
-int settings_set(Settings *setting, const char *section, const char *key, const char *value);
+int settings_set(Settings *setting, const char *section, const char *key,
+		const char *value);
 
 /*
  * Returns the number of associations between keys and values that exist
@@ -328,7 +336,8 @@ int settings_section_get_count(const Settings *settings, const char *section);
  *
  * Return value: 1 if enumeration completed, 0 otherwise.
  */
-int settings_section_enum(const Settings *settings, const char *section, settings_section_enum_func enum_func, const void *obj);
+int settings_section_enum(const Settings *settings, const char *section,
+		settings_section_enum_func enum_func, const void *obj);
 
 #ifdef __cplusplus
 }
@@ -338,170 +347,170 @@ int settings_section_enum(const Settings *settings, const char *section, setting
 
 /*
 
-		   GNU LESSER GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
+ GNU LESSER GENERAL PUBLIC LICENSE
+ Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
 
-  This version of the GNU Lesser General Public License incorporates
-the terms and conditions of version 3 of the GNU General Public
-License, supplemented by the additional permissions listed below.
+ This version of the GNU Lesser General Public License incorporates
+ the terms and conditions of version 3 of the GNU General Public
+ License, supplemented by the additional permissions listed below.
 
-  0. Additional Definitions.
+ 0. Additional Definitions.
 
-  As used herein, "this License" refers to version 3 of the GNU Lesser
-General Public License, and the "GNU GPL" refers to version 3 of the GNU
-General Public License.
+ As used herein, "this License" refers to version 3 of the GNU Lesser
+ General Public License, and the "GNU GPL" refers to version 3 of the GNU
+ General Public License.
 
-  "The Library" refers to a covered work governed by this License,
-other than an Application or a Combined Work as defined below.
+ "The Library" refers to a covered work governed by this License,
+ other than an Application or a Combined Work as defined below.
 
-  An "Application" is any work that makes use of an interface provided
-by the Library, but which is not otherwise based on the Library.
-Defining a subclass of a class defined by the Library is deemed a mode
-of using an interface provided by the Library.
+ An "Application" is any work that makes use of an interface provided
+ by the Library, but which is not otherwise based on the Library.
+ Defining a subclass of a class defined by the Library is deemed a mode
+ of using an interface provided by the Library.
 
-  A "Combined Work" is a work produced by combining or linking an
-Application with the Library.  The particular version of the Library
-with which the Combined Work was made is also called the "Linked
-Version".
+ A "Combined Work" is a work produced by combining or linking an
+ Application with the Library.  The particular version of the Library
+ with which the Combined Work was made is also called the "Linked
+ Version".
 
-  The "Minimal Corresponding Source" for a Combined Work means the
-Corresponding Source for the Combined Work, excluding any source code
-for portions of the Combined Work that, considered in isolation, are
-based on the Application, and not on the Linked Version.
+ The "Minimal Corresponding Source" for a Combined Work means the
+ Corresponding Source for the Combined Work, excluding any source code
+ for portions of the Combined Work that, considered in isolation, are
+ based on the Application, and not on the Linked Version.
 
-  The "Corresponding Application Code" for a Combined Work means the
-object code and/or source code for the Application, including any data
-and utility programs needed for reproducing the Combined Work from the
-Application, but excluding the System Libraries of the Combined Work.
+ The "Corresponding Application Code" for a Combined Work means the
+ object code and/or source code for the Application, including any data
+ and utility programs needed for reproducing the Combined Work from the
+ Application, but excluding the System Libraries of the Combined Work.
 
-  1. Exception to Section 3 of the GNU GPL.
+ 1. Exception to Section 3 of the GNU GPL.
 
-  You may convey a covered work under sections 3 and 4 of this License
-without being bound by section 3 of the GNU GPL.
+ You may convey a covered work under sections 3 and 4 of this License
+ without being bound by section 3 of the GNU GPL.
 
-  2. Conveying Modified Versions.
+ 2. Conveying Modified Versions.
 
-  If you modify a copy of the Library, and, in your modifications, a
-facility refers to a function or data to be supplied by an Application
-that uses the facility (other than as an argument passed when the
-facility is invoked), then you may convey a copy of the modified
-version:
+ If you modify a copy of the Library, and, in your modifications, a
+ facility refers to a function or data to be supplied by an Application
+ that uses the facility (other than as an argument passed when the
+ facility is invoked), then you may convey a copy of the modified
+ version:
 
-   a) under this License, provided that you make a good faith effort to
-   ensure that, in the event an Application does not supply the
-   function or data, the facility still operates, and performs
-   whatever part of its purpose remains meaningful, or
+ a) under this License, provided that you make a good faith effort to
+ ensure that, in the event an Application does not supply the
+ function or data, the facility still operates, and performs
+ whatever part of its purpose remains meaningful, or
 
-   b) under the GNU GPL, with none of the additional permissions of
-   this License applicable to that copy.
+ b) under the GNU GPL, with none of the additional permissions of
+ this License applicable to that copy.
 
-  3. Object Code Incorporating Material from Library Header Files.
+ 3. Object Code Incorporating Material from Library Header Files.
 
-  The object code form of an Application may incorporate material from
-a header file that is part of the Library.  You may convey such object
-code under terms of your choice, provided that, if the incorporated
-material is not limited to numerical parameters, data structure
-layouts and accessors, or small macros, inline functions and templates
-(ten or fewer lines in length), you do both of the following:
+ The object code form of an Application may incorporate material from
+ a header file that is part of the Library.  You may convey such object
+ code under terms of your choice, provided that, if the incorporated
+ material is not limited to numerical parameters, data structure
+ layouts and accessors, or small macros, inline functions and templates
+ (ten or fewer lines in length), you do both of the following:
 
-   a) Give prominent notice with each copy of the object code that the
-   Library is used in it and that the Library and its use are
-   covered by this License.
+ a) Give prominent notice with each copy of the object code that the
+ Library is used in it and that the Library and its use are
+ covered by this License.
 
-   b) Accompany the object code with a copy of the GNU GPL and this license
-   document.
+ b) Accompany the object code with a copy of the GNU GPL and this license
+ document.
 
-  4. Combined Works.
+ 4. Combined Works.
 
-  You may convey a Combined Work under terms of your choice that,
-taken together, effectively do not restrict modification of the
-portions of the Library contained in the Combined Work and reverse
-engineering for debugging such modifications, if you also do each of
-the following:
+ You may convey a Combined Work under terms of your choice that,
+ taken together, effectively do not restrict modification of the
+ portions of the Library contained in the Combined Work and reverse
+ engineering for debugging such modifications, if you also do each of
+ the following:
 
-   a) Give prominent notice with each copy of the Combined Work that
-   the Library is used in it and that the Library and its use are
-   covered by this License.
+ a) Give prominent notice with each copy of the Combined Work that
+ the Library is used in it and that the Library and its use are
+ covered by this License.
 
-   b) Accompany the Combined Work with a copy of the GNU GPL and this license
-   document.
+ b) Accompany the Combined Work with a copy of the GNU GPL and this license
+ document.
 
-   c) For a Combined Work that displays copyright notices during
-   execution, include the copyright notice for the Library among
-   these notices, as well as a reference directing the user to the
-   copies of the GNU GPL and this license document.
+ c) For a Combined Work that displays copyright notices during
+ execution, include the copyright notice for the Library among
+ these notices, as well as a reference directing the user to the
+ copies of the GNU GPL and this license document.
 
-   d) Do one of the following:
+ d) Do one of the following:
 
-       0) Convey the Minimal Corresponding Source under the terms of this
-       License, and the Corresponding Application Code in a form
-       suitable for, and under terms that permit, the user to
-       recombine or relink the Application with a modified version of
-       the Linked Version to produce a modified Combined Work, in the
-       manner specified by section 6 of the GNU GPL for conveying
-       Corresponding Source.
+ 0) Convey the Minimal Corresponding Source under the terms of this
+ License, and the Corresponding Application Code in a form
+ suitable for, and under terms that permit, the user to
+ recombine or relink the Application with a modified version of
+ the Linked Version to produce a modified Combined Work, in the
+ manner specified by section 6 of the GNU GPL for conveying
+ Corresponding Source.
 
-       1) Use a suitable shared library mechanism for linking with the
-       Library.  A suitable mechanism is one that (a) uses at run time
-       a copy of the Library already present on the user's computer
-       system, and (b) will operate properly with a modified version
-       of the Library that is interface-compatible with the Linked
-       Version.
+ 1) Use a suitable shared library mechanism for linking with the
+ Library.  A suitable mechanism is one that (a) uses at run time
+ a copy of the Library already present on the user's computer
+ system, and (b) will operate properly with a modified version
+ of the Library that is interface-compatible with the Linked
+ Version.
 
-   e) Provide Installation Information, but only if you would otherwise
-   be required to provide such information under section 6 of the
-   GNU GPL, and only to the extent that such information is
-   necessary to install and execute a modified version of the
-   Combined Work produced by recombining or relinking the
-   Application with a modified version of the Linked Version. (If
-   you use option 4d0, the Installation Information must accompany
-   the Minimal Corresponding Source and Corresponding Application
-   Code. If you use option 4d1, you must provide the Installation
-   Information in the manner specified by section 6 of the GNU GPL
-   for conveying Corresponding Source.)
+ e) Provide Installation Information, but only if you would otherwise
+ be required to provide such information under section 6 of the
+ GNU GPL, and only to the extent that such information is
+ necessary to install and execute a modified version of the
+ Combined Work produced by recombining or relinking the
+ Application with a modified version of the Linked Version. (If
+ you use option 4d0, the Installation Information must accompany
+ the Minimal Corresponding Source and Corresponding Application
+ Code. If you use option 4d1, you must provide the Installation
+ Information in the manner specified by section 6 of the GNU GPL
+ for conveying Corresponding Source.)
 
-  5. Combined Libraries.
+ 5. Combined Libraries.
 
-  You may place library facilities that are a work based on the
-Library side by side in a single library together with other library
-facilities that are not Applications and are not covered by this
-License, and convey such a combined library under terms of your
-choice, if you do both of the following:
+ You may place library facilities that are a work based on the
+ Library side by side in a single library together with other library
+ facilities that are not Applications and are not covered by this
+ License, and convey such a combined library under terms of your
+ choice, if you do both of the following:
 
-   a) Accompany the combined library with a copy of the same work based
-   on the Library, uncombined with any other library facilities,
-   conveyed under the terms of this License.
+ a) Accompany the combined library with a copy of the same work based
+ on the Library, uncombined with any other library facilities,
+ conveyed under the terms of this License.
 
-   b) Give prominent notice with the combined library that part of it
-   is a work based on the Library, and explaining where to find the
-   accompanying uncombined form of the same work.
+ b) Give prominent notice with the combined library that part of it
+ is a work based on the Library, and explaining where to find the
+ accompanying uncombined form of the same work.
 
-  6. Revised Versions of the GNU Lesser General Public License.
+ 6. Revised Versions of the GNU Lesser General Public License.
 
-  The Free Software Foundation may publish revised and/or new versions
-of the GNU Lesser General Public License from time to time. Such new
-versions will be similar in spirit to the present version, but may
-differ in detail to address new problems or concerns.
+ The Free Software Foundation may publish revised and/or new versions
+ of the GNU Lesser General Public License from time to time. Such new
+ versions will be similar in spirit to the present version, but may
+ differ in detail to address new problems or concerns.
 
-  Each version is given a distinguishing version number. If the
-Library as you received it specifies that a certain numbered version
-of the GNU Lesser General Public License "or any later version"
-applies to it, you have the option of following the terms and
-conditions either of that published version or of any later version
-published by the Free Software Foundation. If the Library as you
-received it does not specify a version number of the GNU Lesser
-General Public License, you may choose any version of the GNU Lesser
-General Public License ever published by the Free Software Foundation.
+ Each version is given a distinguishing version number. If the
+ Library as you received it specifies that a certain numbered version
+ of the GNU Lesser General Public License "or any later version"
+ applies to it, you have the option of following the terms and
+ conditions either of that published version or of any later version
+ published by the Free Software Foundation. If the Library as you
+ received it does not specify a version number of the GNU Lesser
+ General Public License, you may choose any version of the GNU Lesser
+ General Public License ever published by the Free Software Foundation.
 
-  If the Library as you received it specifies that a proxy can decide
-whether future versions of the GNU Lesser General Public License shall
-apply, that proxy's public statement of acceptance of any version is
-permanent authorization for you to choose that version for the
-Library.
+ If the Library as you received it specifies that a proxy can decide
+ whether future versions of the GNU Lesser General Public License shall
+ apply, that proxy's public statement of acceptance of any version is
+ permanent authorization for you to choose that version for the
+ Library.
 
-*/
+ */

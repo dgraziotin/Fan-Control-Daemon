@@ -40,7 +40,7 @@ typedef struct s_sensors t_sensors;
 struct s_fans;
 typedef struct s_fans t_fans;
 
-char *smprintf(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
+char* smprintf(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 
 /**
  * Return true if the kernel is < 3.15.0
@@ -52,20 +52,20 @@ bool is_legacy_sensors_path();
  * /etc/mbpfan.conf
  * If it fails, the default hardcoded settings are used
  */
-void retrieve_settings(const char* settings_path, t_fans *fans);
+void retrieve_settings(const char *settings_path, t_fans *fans);
 
 /**
  * Detect the sensors in /sys/devices/platform/coretemp.0/temp
  * and /sys/devices/platform/coretemp.1/temp etc
  * Return a linked list of t_sensors (first temperature detected)
  */
-t_sensors *retrieve_sensors();
+t_sensors* retrieve_sensors();
 
 /**
  * Given a linked list of t_sensors, refresh their detected
  * temperature
  */
-t_sensors *refresh_sensors(t_sensors *sensors);
+t_sensors* refresh_sensors(t_sensors *sensors);
 
 /**
  * Detect the fans in /sys/devices/platform/applesmc.768/
@@ -89,22 +89,22 @@ void set_fans_auto(t_fans *fans);
  * Given a sensors with associated fans
  * Change their speed
  */
-void set_fan_speed(t_fans* fan, int speed);
+void set_fan_speed(t_fans *fan, int speed);
 
 /**
  * Given a list of fans set their minumum fan speed
  */
-void set_fan_minimum_speed(t_fans* fans);
+void set_fan_minimum_speed(t_fans *fans);
 /**
  *  Return maximum CPU temp in degrees
  */
-unsigned short get_temp(t_sensors* sensors);
+unsigned short get_temp(t_sensors *sensors);
 
 /**
  * Check if user has proper access and that required
  * kernel modules are available
  */
-void check_requirements(const char* program_path);
+void check_requirements(const char *program_path);
 
 /**
  * Main Program

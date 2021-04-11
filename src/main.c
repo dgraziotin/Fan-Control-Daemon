@@ -29,49 +29,47 @@
 #include "global.h"
 #include "util.h"
 
-void print_usage(int argc, char *argv[])
-{
-    if (argc >=1) {
-        printf("Usage: %s OPTION(S) \n", argv[0]);
-        printf("Options:\n");
-        printf("\t-h Show this help screen\n");
-        printf("\t-f Run in foreground\n");
-        printf("\t-v Be (a lot) verbose\n");
-        printf("\n");
-    }
+void print_usage(int argc, char *argv[]) {
+	if (argc >= 1) {
+		printf("Usage: %s OPTION(S) \n", argv[0]);
+		printf("Options:\n");
+		printf("\t-h Show this help screen\n");
+		printf("\t-f Run in foreground\n");
+		printf("\t-v Be (a lot) verbose\n");
+		printf("\n");
+	}
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
-    int c;
+	int c;
 
-    while( (c = getopt(argc, argv, "hfv|help")) != -1) {
-        switch(c) {
-        case 'h':
-            print_usage(argc, argv);
-            exit(EXIT_SUCCESS);
-            break;
+	while ((c = getopt(argc, argv, "hfv|help")) != -1) {
+		switch (c) {
+		case 'h':
+			print_usage(argc, argv);
+			exit(EXIT_SUCCESS);
+			break;
 
-        case 'f':
-            daemonize = 0;
-            break;
+		case 'f':
+			daemonize = 0;
+			break;
 
-        case 'v':
-            verbose = 1;
-            break;
+		case 'v':
+			verbose = 1;
+			break;
 
-        default:
-            print_usage(argc, argv);
-            exit(EXIT_SUCCESS);
-            break;
-        }
-    }
+		default:
+			print_usage(argc, argv);
+			exit(EXIT_SUCCESS);
+			break;
+		}
+	}
 
-    check_requirements(argv[0]);
+	check_requirements(argv[0]);
 
-    // pointer to mbpfan() function in mbpfan.c
-    void (*fan_control)() = mbpfan;
-    go_daemon(fan_control);
-    exit(EXIT_SUCCESS);
+	// pointer to mbpfan() function in mbpfan.c
+	void (*fan_control)() = mbpfan;
+	go_daemon(fan_control);
+	exit(EXIT_SUCCESS);
 }

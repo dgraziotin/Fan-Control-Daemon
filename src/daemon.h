@@ -50,5 +50,4 @@ void signal_handler(int signal);
  */
 void go_daemon(void (*function)());
 
-
 #endif
