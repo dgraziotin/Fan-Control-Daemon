@@ -1,4 +1,12 @@
-# mbpfan
+# mbpfan (With modifications from Rick Sanchez)
+
+_Hi I love this repository and I have an Mac but not an MacBook... and my smc have an specific configuration because... 6 fan and I have never change the thermal pasta...paste.., I have never change my thermal paste, That I want to tell!_
+
+_So I add here my configurations and maybe more..._
+
+_Goodbye._
+
+ _--RickSanchez_
 
 [![Build Status](https://travis-ci.org/dgraziotin/mbpfan.svg?branch=master)](https://travis-ci.org/dgraziotin/mbpfan)
 
