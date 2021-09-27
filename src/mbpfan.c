@@ -31,6 +31,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
@@ -52,6 +53,7 @@
 
 #define CORETEMP_PATH "/sys/devices/platform/coretemp.0"
 #define APPLESMC_PATH "/sys/devices/platform/applesmc.768"
+#define ALT_APPLESMC_PATH "/sys/bus/acpi/drivers/applesmc"
 
 /* temperature thresholds
  * low_temp - temperature below which fan speed will be at minimum
@@ -74,6 +76,9 @@ int polling_interval = 1;
 
 t_sensors *sensors = NULL;
 t_fans *fans = NULL;
+char applesmc_path[PATH_MAX];
+char applesmc_fan_path[PATH_MAX];
+
 
 char *smprintf(const char *fmt, ...)
 {
@@ -273,7 +278,7 @@ t_fans *retrieve_fans()
     char *path_fan_max = NULL;
     char *path_fan_min = NULL;
 
-    const char *path_begin = "/sys/devices/platform/applesmc.768/fan";
+    const char *path_begin = (const char *) &applesmc_fan_path;
     const char *path_output_end = "_output";
     const char *path_label_end = "_label";
     const char *path_man_end = "_manual";
@@ -553,15 +558,41 @@ void check_requirements(const char *program_path)
     }
 
     closedir(dir);
+    memset(&applesmc_path, 0, PATH_MAX);
+    memset(&applesmc_fan_path, 0, PATH_MAX);
 
     dir = opendir(APPLESMC_PATH);
 
-    if (ENOENT == errno) {
-        mbp_log(LOG_ERR, "%s needs applesmc support. Please either load it or build it into the kernel. Exiting.", program_path);
-        exit(EXIT_FAILURE);
+    if (ENOENT != errno) {
+        strncpy((char *) &applesmc_path, APPLESMC_PATH, PATH_MAX);
+    } else {
+        /**
+        * Check for alternate ACPI device path for newer macbooks
+        */
+        closedir(dir);
+        dir = opendir(ALT_APPLESMC_PATH);
+        if (ENOENT != errno) {
+            struct dirent *ent;
+            while ((ent = readdir(dir)) != NULL) {
+                if (strncmp("APP", (const char *) &ent->d_name, 3) == 0) {
+                    snprintf((char *) &applesmc_path, PATH_MAX, "%s/%s", ALT_APPLESMC_PATH, (char *) &ent->d_name);
+                    break;
+                }
+            }
+        }
     }
 
     closedir(dir);
+
+    if (strlen(applesmc_path) != 0) {
+        strncpy((char *) &applesmc_fan_path, (char *) &applesmc_path, PATH_MAX);
+        strcat((char *) &applesmc_fan_path, "/fan");
+        if (verbose) mbp_log(LOG_INFO, "applesmc device path: %s", (char *) &applesmc_path);
+
+    } else {
+        mbp_log(LOG_ERR, "%s needs applesmc support. Please either load it or build it into the kernel. Exiting.", program_path);
+        exit(EXIT_FAILURE);
+    }
 }
 
 int get_max_mhz(void)
