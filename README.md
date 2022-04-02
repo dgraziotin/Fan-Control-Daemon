@@ -223,6 +223,13 @@ execute the following (as root):
     sudo systemctl daemon-reload
     sudo systemctl start mbpfan.service
 
+**dinit**
+A [dinit](https://github.com/davmac314/dinit) service definition is also included. To use it, execute the following:
+    
+    sudo cp mbpfan.dinit /etc/dinit.d/mbpfan
+    sudo dinitctl enable mbpfan
+    sudo dinitctl start mbpfan
+
 ## Usage
 
     Usage: ./mbpfan OPTION(S)
