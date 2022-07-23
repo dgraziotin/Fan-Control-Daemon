@@ -7,8 +7,9 @@ After=sysinit.target
 Type=simple
 ExecStart=/usr/sbin/mbpfan -f
 ExecReload=/usr/bin/kill -HUP $MAINPID
-PIDFile=/var/run/mbpfan.pid
+PIDFile=/run/mbpfan.pid
 Restart=always
+RestartSec=1
 
 [Install]
 WantedBy=sysinit.target
