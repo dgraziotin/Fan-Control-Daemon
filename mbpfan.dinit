@@ -1,0 +1,7 @@
+type      = bgprocess
+command   = /usr/bin/mbpfan
+restart   = true
+logfile   = /var/log/dinit/mbpfan.log
+waits-for = loginready
+pid-file  = /var/run/mbpfan.pid
+

@@ -2,7 +2,7 @@
 #define _GLOBAL_H_
 
 #define PROGRAM_NAME "mbpfan"
-#define PROGRAM_VERSION "2.2.0"
+#define PROGRAM_VERSION "2.3.0"
 #define PROGRAM_PID "/var/run/mbpfan.pid"
 
 extern int daemonize;
