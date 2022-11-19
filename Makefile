@@ -63,6 +63,7 @@ install: all
 	install -d $(DESTDIR)/etc
 	install -d $(DESTDIR)/lib/systemd/system
 	install -d $(DESTDIR)/usr/share/doc/mbpfan
+	install -d $(DESTDIR)/lib/modules-load.d
 	install $(BIN) $(DESTDIR)/usr/sbin
 	install -m644 $(CONF) $(DESTDIR)/etc
 	install -m644 $(DEPEND_MODULE) $(DESTDIR)/lib/modules-load.d
