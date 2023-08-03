@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #define __USE_MISC
+#define _GNU_SOURCE
 #include <syslog.h>
 
 #include "global.h"
