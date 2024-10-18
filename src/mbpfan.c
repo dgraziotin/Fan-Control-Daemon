@@ -196,7 +196,7 @@ t_sensors *retrieve_sensors()
                 if (file != NULL) {
                     s = (t_sensors *)malloc(sizeof(t_sensors));
                     s->path = strdup(path);
-                    fscanf(file, "%d", &s->temperature);
+                    fscanf(file, "%u", &s->temperature);
 
                     if (sensors_head == NULL) {
                         sensors_head = s;
