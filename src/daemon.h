@@ -16,6 +16,11 @@
 #ifndef _DAEMON_H_
 #define _DAEMON_H_
 
+#include <signal.h>
+
+extern sig_atomic_t do_exit;
+extern sig_atomic_t do_reload;
+
 /**
  * Write the PID of the forked daemon to the
  * .pid file defined in char *program_pid
@@ -49,5 +54,7 @@ void signal_handler(int signal);
  * Daemonizes
  */
 void go_daemon(void (*function)());
+
+void cleanup_and_exit(int exit_code);
 
 #endif

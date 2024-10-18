@@ -42,6 +42,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/errno.h>
+#include "daemon.h"
 #include "mbpfan.h"
 #include "global.h"
 #include "settings.h"
@@ -660,6 +661,17 @@ recalibrate:
     sleep(2);
 
     while (1) {
+        if (do_exit) {
+            syslog(LOG_WARNING, "Received SIGTERM, SIGQUIT, or SIGINT signal.");
+            cleanup_and_exit(EXIT_SUCCESS);
+        }
+
+        if (do_reload) {
+            syslog(LOG_WARNING, "Received SIGHUP signal.");
+            retrieve_settings(NULL, fans);
+            do_reload = 0;
+        }
+
         old_temp = new_temp;
         new_temp = get_temp(sensors);
 

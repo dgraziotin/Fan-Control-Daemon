@@ -36,6 +36,8 @@
 
 int daemonize = 1;
 int verbose = 0;
+sig_atomic_t do_exit = 0;
+sig_atomic_t do_reload = 0;
 
 int write_pid(int pid)
 {
@@ -77,7 +79,7 @@ int delete_pid()
     return remove(PROGRAM_PID);
 }
 
-static void cleanup_and_exit(int exit_code)
+void cleanup_and_exit(int exit_code)
 {
     delete_pid();
     set_fans_auto(fans);
@@ -109,44 +111,24 @@ static void cleanup_and_exit(int exit_code)
     exit(exit_code);
 }
 
-void signal_handler(int signal)
+static void sighup_handler(int signal)
 {
+    do_reload = 1;
+}
 
-    switch (signal) {
-    case SIGHUP:
-        syslog(LOG_WARNING, "Received SIGHUP signal.");
-        retrieve_settings(NULL, fans);
-        break;
-
-    case SIGTERM:
-        syslog(LOG_WARNING, "Received SIGTERM signal.");
-        cleanup_and_exit(EXIT_SUCCESS);
-        break;
-
-    case SIGQUIT:
-        syslog(LOG_WARNING, "Received SIGQUIT signal.");
-        cleanup_and_exit(EXIT_SUCCESS);
-        break;
-
-    case SIGINT:
-        syslog(LOG_WARNING, "Received SIGINT signal.");
-        cleanup_and_exit(EXIT_SUCCESS);
-        break;
-
-    default:
-        syslog(LOG_WARNING, "Unhandled signal (%d) %s", signal, strsignal(signal));
-        break;
-    }
+static void sigterm_handler(int signal)
+{
+    do_exit = 1;
 }
 
 void go_daemon(void (*fan_control)())
 {
 
     // Setup signal handling before we start
-    signal(SIGHUP, signal_handler);
-    signal(SIGTERM, signal_handler);
-    signal(SIGQUIT, signal_handler);
-    signal(SIGINT, signal_handler);
+    signal(SIGHUP, sighup_handler);
+    signal(SIGTERM, sigterm_handler);
+    signal(SIGQUIT, sigterm_handler);
+    signal(SIGINT, sigterm_handler);
 
     // Setup syslog logging - see SETLOGMASK(3)
     if (verbose) {
