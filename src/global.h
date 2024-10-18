@@ -1,6 +1,8 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
+#include <stdio.h>
+
 #define PROGRAM_NAME "mbpfan"
 #define PROGRAM_VERSION "2.4.0"
 #define PROGRAM_PID "/run/mbpfan.pid"
