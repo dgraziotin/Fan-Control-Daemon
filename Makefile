@@ -19,7 +19,7 @@ BINFLAG = -o
 INCLUDES =
 LIBS = -lm
 LIBPATH =
-CFLAGS += $(COPT) -g $(INCLUDES) -Wall -Wextra -Wno-unused-function -std=c99 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500
+CFLAGS += $(COPT) -g $(INCLUDES) -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -std=c99 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500
 LDFLAGS += $(LIBPATH) -g
 
 OBJS := $(patsubst %.$(C),%.$(OBJ),$(wildcard $(SOURCE_PATH)*.$(C)))
