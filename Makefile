@@ -50,6 +50,9 @@ clean:
 tests: all
 	./bin/mbpfan-tests
 
+clang-tidy:
+	clang-tidy src/*.[ch]
+
 uninstall:
 	rm /usr/sbin/mbpfan
 	rm /etc/mbpfan.conf
