@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         switch (c) {
         case 'h':
             print_usage(argc, argv);
-            exit(EXIT_SUCCESS);
+            return EXIT_SUCCESS;
             break;
 
         case 'f':
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
         default:
             print_usage(argc, argv);
-            exit(EXIT_SUCCESS);
+            return EXIT_SUCCESS;
             break;
         }
     }
@@ -71,5 +71,5 @@ int main(int argc, char *argv[])
     // pointer to mbpfan() function in mbpfan.c
     void (*fan_control)() = mbpfan;
     go_daemon(fan_control);
-    exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
