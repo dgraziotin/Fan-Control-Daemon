@@ -20,14 +20,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h>  // NOLINT(misc-include-cleaner)
 #include <syslog.h>
 #include <stdbool.h>
-#include <errno.h>
 #include "mbpfan.h"
 #include "daemon.h"
 #include "global.h"
-#include "util.h"
 
 void print_usage(int argc, char *argv[])
 {
@@ -46,7 +44,7 @@ int main(int argc, char *argv[])
 
     int c;
 
-    while ((c = getopt(argc, argv, "hfv|help")) != -1) {
+    while ((c = getopt(argc, argv, "hfv|help")) != -1) {  // NOLINT(misc-include-cleaner)
         switch (c) {
         case 'h':
             print_usage(argc, argv);

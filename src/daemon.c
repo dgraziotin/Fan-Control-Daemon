@@ -16,15 +16,16 @@
  *
  */
 
+#include <linux/prctl.h>
 #include <sys/prctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <fcntl.h>
 #include <errno.h>
 #include <syslog.h>
+#include <sys/syslog.h>
 #include <string.h>
 #include <assert.h>
 #include <signal.h>

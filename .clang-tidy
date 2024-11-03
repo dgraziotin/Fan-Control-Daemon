@@ -29,7 +29,6 @@ Checks: '
     -hicpp-*,
     -llvm-*,
     -llvmlibc-*,
-    -misc-include-cleaner,
     -misc-unused-parameters,
     -modernize-macro-to-enum,
     -readability-braces-around-statements,

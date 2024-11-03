@@ -40,9 +40,6 @@
 extern "C" {
 #endif
 
-#include <stdlib.h>
-#include <string.h>
-
 typedef struct StrMap StrMap;
 
 /*

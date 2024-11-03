@@ -31,12 +31,7 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-#include <ctype.h>
-
-#include "strmap.h"
 
 #ifdef __cplusplus
 extern "C" {

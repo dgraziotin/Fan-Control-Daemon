@@ -28,6 +28,8 @@
  *  Tested models: see README.md
  */
 
+#include <linux/limits.h>
+#include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +41,7 @@
 #include <syslog.h>
 #include <stdbool.h>
 #include <dirent.h>
+#include <sys/syslog.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <sys/errno.h>

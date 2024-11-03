@@ -11,7 +11,7 @@ void mbp_log(int level, const char *fmt, ...)
     va_list args;
     if (daemonize) {
         va_start(args, fmt);
-        vsyslog(level, fmt, args);
+        vsyslog(level, fmt, args);  // NOLINT(misc-include-cleaner)
         va_end(args);
     }
 
